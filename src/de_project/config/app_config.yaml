@@ -1,0 +1,10 @@
+# datasets:
+#   events:
+#     table_name: "default.events_{process_date}"
+#     csv_path: "dbfs:/Volumes/de_catalog/raw/shared_data"
+
+
+datasets:
+  events:
+    table_name: "default.events_{process_date}"
+    csv_path: "/Volumes/de_catalog/raw/shared_data"
