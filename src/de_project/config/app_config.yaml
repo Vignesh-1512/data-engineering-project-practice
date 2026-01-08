@@ -4,7 +4,15 @@
 #     csv_path: "dbfs:/Volumes/de_catalog/raw/shared_data"
 
 
+runtime:
+  mode: databricks   # databricks | local
+
 datasets:
-  events:
+  events_databricks:
     table_name: "default.events_{process_date}"
     csv_path: "/Volumes/de_catalog/raw/shared_data"
+
+
+  events_local:
+    table_name: "default.events_{process_date}"
+    csv_path: "data/raw"
