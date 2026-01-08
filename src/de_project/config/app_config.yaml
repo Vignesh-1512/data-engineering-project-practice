@@ -3,16 +3,15 @@
 #     table_name: "default.events_{process_date}"
 #     csv_path: "dbfs:/Volumes/de_catalog/raw/shared_data"
 
-
 runtime:
   mode: databricks   # databricks | local
 
 datasets:
-  events_databricks:
-    table_name: "default.events_{process_date}"
-    csv_path: "/Volumes/de_catalog/raw/shared_data"
+  events:
+    databricks:
+      table_name: "default.events_{process_date}"
+      csv_path: "/Volumes/de_catalog/raw/shared_data"
+    local:
+      table_name: "default.events_{process_date}"
+      csv_path: "data/raw"
 
-
-  events_local:
-    table_name: "default.events_{process_date}"
-    csv_path: "data/raw"
