@@ -7,8 +7,11 @@ logger = logging.getLogger(__name__)
 def extract_run(dataset: str, process_date: str):
     spark = SparkSession.builder.getOrCreate()
     config = load_config()
+    
+    runtime = get_runtime_mode()
+    print(f"Running in {runtime.upper()} mode")
 
-    dataset_config = config["datasets"][dataset]
+    dataset_config = config["datasets"][dataset][runtime]
     csv_dir = dataset_config["csv_path"]
 
     safe_date = process_date.replace("-", "_")
