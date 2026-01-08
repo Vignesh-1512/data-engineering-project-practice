@@ -13,21 +13,8 @@ The current implementation supports:
 
 ##  High-Level Architecture
 
-CSV Files (Databricks Volume)
-        |
-        v
-Extract Job (Spark Read CSV)
-        |
-        v
-TEMP VIEW (Raw Data)
-events_YYYY_MM_DD
-        |
-        v
-Transform Job (Spark SQL)
-        |
-        v
-TEMP VIEW (Transformed Data)
-events_transformed_YYYY_MM_DD
+<img width="1024" height="1536" alt="ChatGPT Image Jan 8, 2026, 11_18_37 AM" src="https://github.com/user-attachments/assets/7d00b1d4-3229-4d00-8d4a-b3fc180562d3" />
+
 
 ---
 
@@ -113,3 +100,4 @@ main("events", "2026_01_07", "transform")
 
 ##  Author
 Vignesh S
+
