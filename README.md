@@ -20,20 +20,8 @@ The current implementation supports:
 
 ##  Project Structure
 
-de_project/
-│
-├── src/de_project/
-│   ├── main.py
-│   ├── jobs/
-│   │   ├── extract_job.py
-│   │   └── transform_job.py
-│   ├── utils/
-│   │   └── config_loader.py
-│   └── config/
-│       └── app_config.yaml
-│
-├── pyproject.toml
-├── README.md
+<img width="1024" height="1536" alt="ChatGPT Image Jan 8, 2026, 11_33_25 AM" src="https://github.com/user-attachments/assets/d32c7514-0a4a-43ff-a5a0-083cba95b6b1" />
+
 
 ---
 
@@ -100,4 +88,5 @@ main("events", "2026_01_07", "transform")
 
 ##  Author
 Vignesh S
+
 
