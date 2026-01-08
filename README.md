@@ -33,16 +33,17 @@ All datasets and paths are defined in **YAML**:
 
 ```yaml
 runtime:
-  mode: databricks  # automatically detects local or databricks
+  mode: databricks   # databricks | local
 
 datasets:
-  events_databricks:
-    table_name: "default.events_{process_date}"
-    csv_path: "/Volumes/de_catalog/raw/shared_data"
+  events:
+    databricks:
+      table_name: "default.events_{process_date}"
+      csv_path: "/Volumes/de_catalog/raw/shared_data"
+    local:
+      table_name: "default.events_{process_date}"
+      csv_path: "data/raw"
 
-  events_local:
-    table_name: "default.events_{process_date}"
-    csv_path: "data/raw"
 ```
 
 - **`runtime.mode`** is automatically determined (Databricks or Local)
@@ -50,6 +51,46 @@ datasets:
 - No manual switching required
 
   
+---
+
+## Runtime Detection (`runtime_detector`)
+
+The project automatically detects whether it’s running on **Databricks** or **local** environment using `runtime_detector.py`.
+
+```python
+import os
+
+def get_runtime_mode() -> str:
+    """
+    Detect execution environment automatically.
+    Returns: 'databricks' or 'local'
+    """
+    if os.getenv("DATABRICKS_RUNTIME_VERSION"):
+        return "databricks"
+    return "local"
+```
+
+- **Databricks**: Checks for `DATABRICKS_RUNTIME_VERSION` environment variable  
+- **Local**: Defaults to `'local'` if the environment variable is not found  
+
+**Example usage in extract/transform jobs:**
+
+```python
+from de_project.utils.runtime_detector import get_runtime_mode
+
+runtime = get_runtime_mode()
+print(f"Running in {runtime.upper()} mode")
+```
+
+- Output on local: `Running in LOCAL mode`  
+- Output on Databricks: `Running in DATABRICKS mode`
+
+This ensures:
+
+- Correct dataset path (`csv_path`) is chosen automatically  
+- No need for manual switching in `main.py`  
+- Works both on your local machine and in Databricks notebooks
+
 ---
 
 ## Entry Point
@@ -152,6 +193,7 @@ main("events", "2026_01_07", "transform")
 
 ##  Author
 Vignesh S
+
 
 
 
