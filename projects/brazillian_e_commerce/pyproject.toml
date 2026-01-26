@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brazillian_e_commerce"
+version = "0.4.1"
+description = "Brazilian E-Commerce Data Engineering Pipeline"
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "pyspark",
+    "pyyaml"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+brazillian_e_commerce = ["config/*.yaml"]
+

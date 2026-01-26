@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: brazillian_e_commerce
+Version: 0.4.1
+Summary: Brazilian E-Commerce Data Engineering Pipeline
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: pyspark
+Requires-Dist: pyyaml

@@ -1,0 +1,86 @@
+# Bronze Congig
+
+bronze:
+  orders:
+    source_table: brazillian_e_commerce.source.orders
+    target_table: brazillian_e_commerce.bronze.bronze_orders
+    load_type: incremental
+    watermark_column: order_purchase_timestamp
+
+  order_items:
+    source_table: brazillian_e_commerce.source.order_items
+    target_table: brazillian_e_commerce.bronze.bronze_order_items
+    load_type: incremental
+    watermark_column: shipping_limit_date
+
+  products:
+    source_table: brazillian_e_commerce.source.products
+    target_table: brazillian_e_commerce.bronze.bronze_products
+    load_type: full
+
+  customers:
+    source_table: brazillian_e_commerce.source.customers
+    target_table: brazillian_e_commerce.bronze.bronze_customers
+    load_type: full
+
+# Silver Config
+
+
+silver:
+  orders:
+    source_table: brazillian_e_commerce.bronze.bronze_orders
+    target_table: brazillian_e_commerce.silver.silver_orders
+
+  order_items:
+    source_table: brazillian_e_commerce.bronze.bronze_order_items
+    target_table: brazillian_e_commerce.silver.silver_order_items
+
+  products:
+    source_table: brazillian_e_commerce.bronze.bronze_products
+    target_table: brazillian_e_commerce.silver.silver_products
+
+  customers:
+    source_table: brazillian_e_commerce.bronze.bronze_customers
+    target_table: brazillian_e_commerce.silver.silver_customers
+
+# Gold Config
+
+
+gold:
+  fact_orders:
+    source_table: brazillian_e_commerce.silver.silver_orders
+    target_table: brazillian_e_commerce.gold.fact_orders
+    type: fact
+
+  fact_sales:
+    source_table: brazillian_e_commerce.silver.silver_order_items
+    target_table: brazillian_e_commerce.gold.fact_sales
+    type: fact
+
+  dim_customers:
+    source_table: brazillian_e_commerce.silver.silver_customers
+    target_table: brazillian_e_commerce.gold.dim_customers
+    type: dimension
+
+  dim_products:
+    source_table: brazillian_e_commerce.silver.silver_products
+    target_table: brazillian_e_commerce.gold.dim_products
+    type: dimension
+
+  dim_date:
+    source_table: brazillian_e_commerce.silver.silver_orders
+    target_table: brazillian_e_commerce.gold.dim_date
+    type: dimension
+
+# Final Config:
+
+final:
+  sales_performance:
+    source_tables:
+      fact_sales: brazillian_e_commerce.gold.fact_sales
+      fact_orders: brazillian_e_commerce.gold.fact_orders
+      dim_products: brazillian_e_commerce.gold.dim_products
+      dim_date: brazillian_e_commerce.gold.dim_date
+    target_table: brazillian_e_commerce.final.sales_performance
+    grain: sales_date_product_category
+
