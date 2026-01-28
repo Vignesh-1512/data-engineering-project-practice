@@ -6,13 +6,18 @@ from pyspark.sql.functions import (
     to_date
 )
 
+def build_sales_performance(**tables):
+    """
+    FINAL: Sales Performance (BR-1)
+    Grain: sales_date + product_category
+    """
 
-def build_sales_performance(
-    fact_sales,
-    fact_orders,
-    dim_products,
-    dim_date
-):
+    # 🔑 unpack tables (NO logic change)
+    fact_sales = tables["fact_sales"]
+    fact_orders = tables["fact_orders"]
+    dim_products = tables["dim_products"]
+    dim_date = tables["dim_date"]
+
     df = (
         fact_sales
         .join(fact_orders, "order_id", "inner")
