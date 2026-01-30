@@ -7,10 +7,25 @@ from pyspark.sql.functions import (
 )
 
 def build_sales_performance(**tables):
+    
     """
-    FINAL: Sales Performance (BR-1)
-    Grain: sales_date + product_category
+    Business Requirement 1 – Sales Performance.
+
+    Answers:
+        - Total revenue by product and day
+        - Average order value
+        - Order volume trend
+
+    Grain:
+        sales_date + product_category
+
+    Args:
+        tables (dict): Gold tables required for BR-1
+
+    Returns:
+        DataFrame: Final sales performance dataset
     """
+
 
     # 🔑 unpack tables (NO logic change)
     fact_sales = tables["fact_sales"]

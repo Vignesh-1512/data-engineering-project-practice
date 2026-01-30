@@ -1,11 +1,31 @@
 from pyspark.sql.functions import col, to_date, year, month, dayofmonth
 
+"""
+Generic dimension table builder utilities.
+"""
 
 def build_dim(table_name: str, **sources):
+
     """
-    Generic DIM builder.
-    Accepts dynamic source tables via kwargs.
+    Builds a dimension table dynamically based on table name.
+
+    Supported dimensions:
+        - dim_customers
+        - dim_products
+        - dim_sellers
+        - dim_date
+
+    Args:
+        table_name (str): Dimension table name
+        sources (dict): Source DataFrames
+
+    Returns:
+        DataFrame: Dimension table
+
+    Raises:
+        ValueError: If unsupported dimension is requested
     """
+
 
     if table_name == "dim_customers":
         df = sources["customers"]

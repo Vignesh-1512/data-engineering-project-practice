@@ -10,9 +10,39 @@ from pyspark.sql.functions import (
 
 def build_customer_analytics(**tables):
     """
-    FINAL: Customer Analytics (BR-3)
-    Grain: 1 row per customer
+    BR-3: Customer Analytics
+
+    Purpose:
+        Provide customer-level purchasing behavior and value insights.
+
+    Grain:
+        1 row per customer
+
+    Source Tables:
+        - fact_orders
+        - fact_sales
+        - dim_customers
+        - dim_date
+
+    Business Questions Answered:
+        - How many orders does each customer place?
+        - What is the total and average revenue per customer?
+        - Who are repeat vs new customers?
+        - What is the first and last purchase date per customer?
+
+    Key Metrics:
+        - total_orders
+        - total_revenue
+        - avg_order_value
+        - customer_type (New / Repeat)
+        - first_order_date
+        - last_order_date
+
+    Notes:
+        - Revenue is derived from price + freight_value.
+        - Customer type is classified based on order count.
     """
+
 
     # 🔑 unpack tables (NO logic change)
     fact_sales = tables["fact_sales"]

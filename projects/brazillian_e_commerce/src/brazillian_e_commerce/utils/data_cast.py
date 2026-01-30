@@ -1,17 +1,21 @@
 from pyspark.sql.functions import col,to_timestamp
 
+"""
+Utility module for type casting columns dynamically.
+"""
 
 def cast_columns(df, cast_map: dict):
     """
-    Cast columns based on provided schema map.
+    Casts columns to specified data types.
 
-    Example:
-    {
-        "price": "double",
-        "freight_value": "double",
-        "order_purchase_timestamp": "timestamp"
-    }
+    Args:
+        df (DataFrame): Input dataframe
+        cast_map (dict): Column to datatype mapping
+
+    Returns:
+        DataFrame: DataFrame with casted columns
     """
+
     for column, dtype in cast_map.items():
         if column in df.columns:
             df = df.withColumn(column, col(column).cast(dtype))

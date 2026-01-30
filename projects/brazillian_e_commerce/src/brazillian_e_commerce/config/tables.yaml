@@ -2,49 +2,81 @@
 
 bronze:
   orders:
-    source_table: brazillian_e_commerce.source.orders
-    target_table: brazillian_e_commerce.bronze.bronze_orders
+    catalog: brazillian_e_commerce
+    source_schema: source
+    target_schema: bronze
+    table_name: bronze_orders
+    source_table: orders
     load_type: incremental
     watermark_column: order_purchase_timestamp
 
   order_items:
-    source_table: brazillian_e_commerce.source.order_items
-    target_table: brazillian_e_commerce.bronze.bronze_order_items
+    catalog: brazillian_e_commerce
+    source_schema: source
+    target_schema: bronze
+    table_name: bronze_order_items
+    source_table: order_items
     load_type: incremental
     watermark_column: shipping_limit_date
 
   products:
-    source_table: brazillian_e_commerce.source.products
-    target_table: brazillian_e_commerce.bronze.bronze_products
+    catalog: brazillian_e_commerce
+    source_schema: source
+    target_schema: bronze
+    table_name: bronze_products
+    source_table: products
     load_type: full
 
   customers:
-    source_table: brazillian_e_commerce.source.customers
-    target_table: brazillian_e_commerce.bronze.bronze_customers
+    catalog: brazillian_e_commerce
+    source_schema: source
+    target_schema: bronze
+    table_name: bronze_customers
+    source_table: customers
     load_type: full
 
   sellers:
-    source_table: brazillian_e_commerce.source.sellers
-    target_table: brazillian_e_commerce.bronze.bronze_sellers
+    catalog: brazillian_e_commerce
+    source_schema: source
+    target_schema: bronze
+    table_name: bronze_sellers
+    source_table: sellers
     load_type: full
 
   reviews:
-    source_table: brazillian_e_commerce.source.reviews
-    target_table: brazillian_e_commerce.bronze.bronze_reviews
+    catalog: brazillian_e_commerce
+    source_schema: source
+    target_schema: bronze
+    table_name: bronze_reviews
+    source_table: reviews
     load_type: incremental
-    watermark_column : review_creation_date
+    watermark_column: review_creation_date
+
+  payments:
+    catalog: brazillian_e_commerce
+    source_schema: source
+    target_schema: bronze
+    table_name: bronze_payments
+    source_table: payments
+    load_type: full
+
 
 # Silver Config
 
 
 silver:
   orders:
-    source_table: brazillian_e_commerce.bronze.bronze_orders
-    target_table: brazillian_e_commerce.silver.silver_orders
+    catalog: brazillian_e_commerce
+    source_schema: bronze
+    target_schema: silver
+    table_name: silver_orders
+    source_table: bronze_orders
+
     casts:
       order_purchase_timestamp: timestamp
       order_delivered_carrier_date: timestamp
       order_estimated_delivery_date: timestamp
+
     clean_rules:
       rename:
         order_purchase_timestamp: order_purchase_ts
@@ -52,82 +84,149 @@ silver:
         order_estimated_delivery_date: order_estimated_delivery_ts
       drop_nulls:
         - order_id
-        - customer_id  
+        - customer_id
 
   order_items:
-    source_table: brazillian_e_commerce.bronze.bronze_order_items
-    target_table: brazillian_e_commerce.silver.silver_order_items
+    catalog: brazillian_e_commerce
+    source_schema: bronze
+    target_schema: silver
+    table_name: silver_order_items
+    source_table: bronze_order_items
 
   products:
-    source_table: brazillian_e_commerce.bronze.bronze_products
-    target_table: brazillian_e_commerce.silver.silver_products
+    catalog: brazillian_e_commerce
+    source_schema: bronze
+    target_schema: silver
+    table_name: silver_products
+    source_table: bronze_products
 
   customers:
-    source_table: brazillian_e_commerce.bronze.bronze_customers
-    target_table: brazillian_e_commerce.silver.silver_customers
+    catalog: brazillian_e_commerce
+    source_schema: bronze
+    target_schema: silver
+    table_name: silver_customers
+    source_table: bronze_customers
 
   sellers:
-    source_table: brazillian_e_commerce.bronze.bronze_sellers
-    target_table: brazillian_e_commerce.silver.silver_sellers
+    catalog: brazillian_e_commerce
+    source_schema: bronze
+    target_schema: silver
+    table_name: silver_sellers
+    source_table: bronze_sellers
 
   reviews:
-    source_table: brazillian_e_commerce.bronze.bronze_reviews
-    target_table: brazillian_e_commerce.silver.silver_reviews
+    catalog: brazillian_e_commerce
+    source_schema: bronze
+    target_schema: silver
+    table_name: silver_reviews
+    source_table: bronze_reviews
+
+  payments:
+    catalog: brazillian_e_commerce
+    source_schema: bronze
+    target_schema: silver
+    table_name: silver_payments
+    source_table: bronze_payments
+
+    casts:
+      payment_sequential: int
+      payment_installments: int
+      payment_value: double
+
+    clean_rules:
+      drop_nulls:
+        - order_id
+        - payment_type
+        - payment_value
+
+
 
 # Gold Config
 
 
 gold:
-
   dim_customers:
     type: dim
+    catalog: brazillian_e_commerce
+    source_schema: silver
+    target_schema: gold
+    table_name: dim_customers
     source_tables:
-      customers: brazillian_e_commerce.silver.silver_customers
-    target_table: brazillian_e_commerce.gold.dim_customers
+      customers: silver_customers
     grain: customer
 
   dim_products:
     type: dim
+    catalog: brazillian_e_commerce
+    source_schema: silver
+    target_schema: gold
+    table_name: dim_products
     source_tables:
-      products: brazillian_e_commerce.silver.silver_products
-    target_table: brazillian_e_commerce.gold.dim_products
+      products: silver_products
     grain: product
 
   dim_sellers:
     type: dim
+    catalog: brazillian_e_commerce
+    source_schema: silver
+    target_schema: gold
+    table_name: dim_sellers
     source_tables:
-      sellers: brazillian_e_commerce.silver.silver_sellers
-    target_table: brazillian_e_commerce.gold.dim_sellers
+      sellers: silver_sellers
     grain: seller
 
   dim_date:
     type: dim
+    catalog: brazillian_e_commerce
+    source_schema: silver
+    target_schema: gold
+    table_name: dim_date
     source_tables:
-      orders: brazillian_e_commerce.silver.silver_orders
-    target_table: brazillian_e_commerce.gold.dim_date
+      orders: silver_orders
     grain: date
 
   fact_orders:
     type: fact
+    catalog: brazillian_e_commerce
+    source_schema: silver
+    target_schema: gold
+    table_name: fact_orders
     source_tables:
-      orders: brazillian_e_commerce.silver.silver_orders
-    target_table: brazillian_e_commerce.gold.fact_orders
+      orders: silver_orders
     grain: order
 
   fact_sales:
     type: fact
+    catalog: brazillian_e_commerce
+    source_schema: silver
+    target_schema: gold
+    table_name: fact_sales
     source_tables:
-      order_items: brazillian_e_commerce.silver.silver_order_items
-      orders: brazillian_e_commerce.silver.silver_orders
-    target_table: brazillian_e_commerce.gold.fact_sales
+      order_items: silver_order_items
+      orders: silver_orders
     grain: order_item
 
   fact_reviews:
     type: fact
+    catalog: brazillian_e_commerce
+    source_schema: silver
+    target_schema: gold
+    table_name: fact_reviews
     source_tables:
-      reviews: brazillian_e_commerce.silver.silver_reviews
-    target_table: brazillian_e_commerce.gold.fact_reviews
+      reviews: silver_reviews
     grain: order
+
+  fact_payments:
+    type: fact
+    catalog: brazillian_e_commerce
+    source_schema: silver
+    target_schema: gold
+    table_name: fact_payments
+    source_tables:
+      payments: silver_payments
+    grain: payment
+
+
 
 
 # Final Config:
@@ -136,40 +235,90 @@ mart:
 
   sales_performance:
     business_requirement: BR-1
+    catalog: brazillian_e_commerce
+    source_schema: gold
+    target_schema: final
+    table_name: sales_performance
     source_tables:
-      fact_sales: brazillian_e_commerce.gold.fact_sales
-      fact_orders: brazillian_e_commerce.gold.fact_orders
-      dim_products: brazillian_e_commerce.gold.dim_products
-      dim_date: brazillian_e_commerce.gold.dim_date
-    target_table: brazillian_e_commerce.final.sales_performance
+      fact_sales: fact_sales
+      fact_orders: fact_orders
+      dim_products: dim_products
+      dim_date: dim_date
     grain: day_product
 
   order_delivery_summary:
     business_requirement: BR-2
+    catalog: brazillian_e_commerce
+    source_schema: gold
+    target_schema: final
+    table_name: order_delivery_summary
     source_tables:
-      fact_orders: brazillian_e_commerce.gold.fact_orders
-      dim_date: brazillian_e_commerce.gold.dim_date
-    target_table: brazillian_e_commerce.final.order_delivery_summary
+      fact_orders: fact_orders
+      dim_date: dim_date
     grain: day_status
 
   customer_analytics:
     business_requirement: BR-3
+    catalog: brazillian_e_commerce
+    source_schema: gold
+    target_schema: final
+    table_name: customer_analytics
     source_tables:
-      fact_orders: brazillian_e_commerce.gold.fact_orders
-      fact_sales: brazillian_e_commerce.gold.fact_sales
-      dim_customers: brazillian_e_commerce.gold.dim_customers
-      dim_date: brazillian_e_commerce.gold.dim_date
-    target_table: brazillian_e_commerce.final.customer_analytics
+      fact_orders: fact_orders
+      fact_sales: fact_sales
+      dim_customers: dim_customers
+      dim_date: dim_date
     grain: customer
 
   seller_performance:
     business_requirement: BR-4
+    catalog: brazillian_e_commerce
+    source_schema: gold
+    target_schema: final
+    table_name: seller_performance
     source_tables:
-      fact_sales: brazillian_e_commerce.gold.fact_sales
-      fact_orders: brazillian_e_commerce.gold.fact_orders
-      fact_reviews: brazillian_e_commerce.gold.fact_reviews
-      dim_sellers: brazillian_e_commerce.gold.dim_sellers
-      dim_date: brazillian_e_commerce.gold.dim_date
-    target_table: brazillian_e_commerce.final.seller_performance
+      fact_sales: fact_sales
+      fact_orders: fact_orders
+      fact_reviews: fact_reviews
+      dim_sellers: dim_sellers
+      dim_date: dim_date
     grain: seller
 
+  product_category_performance:
+    business_requirement: BR-5
+    catalog: brazillian_e_commerce
+    source_schema: gold
+    target_schema: final
+    table_name: product_category_performance
+    source_tables:
+      fact_sales: fact_sales
+      fact_orders: fact_orders
+      dim_products: dim_products
+      dim_date: dim_date
+    grain: product_category
+
+  payment_analytics:
+    business_requirement: BR-6
+    catalog: brazillian_e_commerce
+    source_schema: gold
+    target_schema: final
+    table_name: payment_analysis
+    source_tables:
+      fact_payments: fact_payments
+      fact_orders: fact_orders
+      dim_date: dim_date
+    grain: day_payment_type
+
+  customer_satisfaction_and_reviews:
+    business_requirement: BR-7
+    catalog: brazillian_e_commerce
+    source_schema: gold
+    target_schema: final
+    table_name: review_satisfaction
+    source_tables:
+      fact_reviews: fact_reviews
+      fact_orders: fact_orders
+      fact_sales: fact_sales
+      dim_products: dim_products
+      dim_date: dim_date
+    grain: customer_satisfaction_and_reviews

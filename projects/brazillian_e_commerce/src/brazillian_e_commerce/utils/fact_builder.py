@@ -1,12 +1,58 @@
 from pyspark.sql.functions import col
 
+"""
+Generic fact table builder utilities.
+"""
+
 
 def build_fact(table_name: str, **sources):
     """
-    Generic FACT builder.
+    Builds a fact table dynamically based on table name.
+
+    Supported facts:
+        - fact_orders
+        - fact_sales
+        - fact_reviews
+        - fact_payments
+
+    Args:
+        table_name (str): Fact table name
+        sources (dict): Source DataFrames
+
+    Returns:
+        DataFrame: Fact table
+
+    Raises:
+        ValueError: If unsupported fact is requested
     """
 
+
     if table_name == "fact_orders":
+    
+        """
+        Builds the fact_orders table.
+
+        Grain:
+            1 row per order
+
+        Source:
+            silver.orders
+
+        Columns:
+            order_id
+            customer_id
+            order_status
+            order_purchase_ts
+            order_delivered_ts
+            order_estimated_delivery_ts
+
+        Args:
+            df (DataFrame): Silver orders dataframe
+
+        Returns:
+            DataFrame: Gold fact_orders table
+        """
+
         df = sources["orders"]
         return df.select(
             col("order_id"),
@@ -35,6 +81,16 @@ def build_fact(table_name: str, **sources):
             col("order_id"),
             col("review_score")
         )
+    elif table_name == "fact_payments":
+        df = sources["payments"]
+        return df.select(
+            col("order_id"),
+            col("payment_sequential"),
+            col("payment_type"),
+            col("payment_installments"),
+            col("payment_value")
+        )
+
 
     else:
         raise ValueError(f"Unsupported FACT table: {table_name}")

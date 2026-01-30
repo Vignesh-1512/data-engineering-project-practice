@@ -11,9 +11,34 @@ from pyspark.sql.functions import (
 
 def build_order_delivery_summary(**tables):
     """
-    FINAL: Order Delivery Summary (BR-2)
-    Grain: order_date + order_status
+    BR-2: Order Delivery Summary
+
+    Purpose:
+        Analyze order delivery behavior over time and by order status.
+
+    Grain:
+        order_date + order_status
+
+    Source Tables:
+        - fact_orders
+        - dim_date
+
+    Business Questions Answered:
+        - How many orders are delivered vs cancelled?
+        - What is the average delivery time?
+        - Are deliveries improving over time?
+        - How many orders are delayed?
+
+    Key Metrics:
+        - total_orders
+        - avg_delivery_days
+        - delayed_orders
+
+    Notes:
+        - Delivery delay is calculated using delivered vs purchase timestamps.
+        - Delay threshold is defined in transformation logic.
     """
+
 
     # 🔑 REQUIRED LINE
     fact_orders = tables["fact_orders"]

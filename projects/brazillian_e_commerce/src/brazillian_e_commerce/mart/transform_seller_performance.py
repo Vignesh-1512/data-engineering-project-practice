@@ -8,9 +8,38 @@ from pyspark.sql.functions import (
 
 def build_seller_performance(**tables):
     """
-    FINAL: Seller Performance (BR-4)
-    Grain: 1 row per seller
+    BR-4: Seller Performance
+
+    Purpose:
+        Evaluate seller contribution, reliability, and customer satisfaction.
+
+    Grain:
+        1 row per seller
+
+    Source Tables:
+        - fact_sales
+        - fact_orders
+        - fact_reviews
+        - dim_sellers
+
+    Business Questions Answered:
+        - Who are the top-performing sellers?
+        - Which sellers delay orders?
+        - Which sellers receive poor reviews?
+        - How much revenue does each seller generate?
+
+    Key Metrics:
+        - total_orders
+        - total_revenue
+        - avg_review_score
+        - delayed_orders
+        - delay_rate
+
+    Notes:
+        - Delay is identified using delivered vs estimated delivery timestamps.
+        - Review data is optional and joined using left join.
     """
+
 
     fact_sales = tables["fact_sales"]
     fact_orders = tables["fact_orders"]

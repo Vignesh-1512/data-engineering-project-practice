@@ -1,18 +1,24 @@
 from pyspark.sql.functions import col
-
+"""
+Utility module for applying data quality rules.
+"""
 
 def clean_data(df, rules: dict):
     """
-    Apply cleaning & standardization rules.
+    Applies data cleaning rules such as renaming and null filtering.
 
-    rules example:
-    {
-        "drop_nulls": ["order_id", "customer_id"],
-        "rename": {
-            "order_purchase_timestamp": "order_purchase_ts"
-        }
-    }
+    Supported rules:
+        - rename
+        - drop_nulls
+
+    Args:
+        df (DataFrame): Input dataframe
+        rules (dict): Cleaning rules from YAML
+
+    Returns:
+        DataFrame: Cleaned dataframe
     """
+
 
     # 1️⃣ Rename columns (standardization)
     rename_map = rules.get("rename", {})

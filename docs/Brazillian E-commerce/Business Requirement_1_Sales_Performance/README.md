@@ -28,11 +28,11 @@ revenue, order volume, product demand, and sales trends over time.
 
 | Table Name | Purpose |
 |-----------|--------|
-| olist.gold.fact_sales | Revenue and quantity metrics |
-| olist.gold.fact_orders | Order counts |
-| olist.gold.dim_date | Time-based analysis |
-| olist.gold.dim_products | Product and category details |
-| olist.gold.dim_customers | Customer segmentation |
+| brazillian_e_commerce.gold.fact_sales | Revenue and quantity metrics |
+| brazillian_e_commerce.gold.fact_orders | Order counts |
+| brazillian_e_commerce.gold.dim_date | Time-based analysis |
+| brazillian_e_commerce.gold.dim_products | Product and category details |
+| brazillian_e_commerce.gold.dim_customers | Customer segmentation |
 
 ---
 

@@ -1,22 +1,26 @@
 from pyspark.sql.functions import current_timestamp, lit
 
+"""
+Utility for adding ingestion metadata columns.
+"""
 
 def add_ingestion_metadata(df, source_system: str):
+    
     """
     Adds standard ingestion metadata columns.
 
-    Parameters
-    ----------
-    df : pyspark.sql.DataFrame
-        Input DataFrame
-    source_system : str
-        Source system name (e.g. olist_kaggle)
+    Columns added:
+        - ingestion_ts
+        - source_system
 
-    Returns
-    -------
-    pyspark.sql.DataFrame
-        DataFrame with metadata columns added
+    Args:
+        df (DataFrame): Input dataframe
+        source_system (str): Source system name
+
+    Returns:
+        DataFrame: DataFrame with metadata columns
     """
+
 
     return (
         df
