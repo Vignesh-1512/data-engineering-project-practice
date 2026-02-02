@@ -1,52 +1,75 @@
 
-Brazilian E-Commerce Data Engineering Project
-(Databricks • PySpark • Medallion Architecture)
+# Brazilian E-Commerce Data Engineering Project
+**Databricks • PySpark • Medallion Architecture**
 
-📌 Overview
-This project demonstrates a real-world Data Engineering pipeline built using Python and Apache Spark on Databricks, following industry-standard Medallion Architecture and config-driven execution.
-The pipeline processes the Brazilian E-Commerce (Olist) dataset end-to-end and delivers business-ready analytics marts aligned with real business requirements (BR-1 to BR-7).
-Key Highlights
+## 📌 Overview
+This project demonstrates a real-world **Data Engineering pipeline** built using **Python and Apache Spark on Databricks**, following industry-standard **Medallion Architecture** and **config-driven execution**.
 
+The pipeline processes the **Brazilian E-Commerce (Olist) dataset** end-to-end and delivers **business-ready analytics marts** aligned with real business requirements (**BR-1 to BR-7**).
 
-Fully config-driven (YAML)
+### 🔑 Key Highlights
+- Fully **config-driven (YAML)**
+- **Single entry point** to run any layer
+- Dynamic table resolution using **catalog & schema**
+- Reusable utilities (ingest, refine, model, mart)
+- Production-style error handling
+- Designed for **Databricks Unity Catalog**
 
+---
 
-Single entry point to run any layer
+## 🧱 Architecture (Medallion)
 
+```
+SOURCE (Kaggle / Unity Catalog)
+        |
+        v
++----------------+
+|     BRONZE     |  Raw ingestion (incremental / full)
++----------------+
+        |
+        v
++----------------+
+|     SILVER     |  Cleaned, typed, standardized
++----------------+
+        |
+        v
++----------------+
+|      GOLD      |  Fact & Dimension models
++----------------+
+        |
+        v
++----------------+
+|      MART      |  Business Requirements (BR-1 → BR-7)
++----------------+
+```
 
-Dynamic table resolution using catalog & schema
+---
 
+## 📂 Project Structure
 
-Reusable utilities (ingest, refine, model, mart)
-
-
-Production-style error handling
-
-
-Designed for Databricks Unity Catalog
-
-
-
-🧱 Architecture (Medallion)
-c:\Users\Welcome\Downloads\ChatGPT Image Jan 30, 2026, 06_51_49 PM.png
-
-
-📂 Project Structure
+```
 brazillian_e_commerce/
 │
 ├── main.py                         # Single entry point
 │
-├── ingest/                         # Bronze layer
-│   └── ingest_runner.py
+├── bronze/                         # Bronze layer
+│   └── ingest.py
 │
-├── refine/                         # Silver layer
-│   └── refine_runner.py
+├── silver/                         # Silver layer
+│   └── refine.py
 │
 ├── gold/                           # Gold modeling
 │   └── model.py
 │
 ├── mart/                           # Business marts
 │   ├── mart_runner.py
+|   ├── transform_sales_performance.py
+|   ├── transform_order_delivery_summary.py
+|   ├── transform_customer_analytics.py
+|   ├── transform_seller_perfromance.py
+|   ├── transform_product_category_performance.py
+|   ├── transform_payment_analytics.py
+|   ├── transform_customer_satisfaction_and_reviews.py
 │   └── builders.py
 │
 ├── utils/                          # Reusable utilities
@@ -60,17 +83,23 @@ brazillian_e_commerce/
 │   ├── dim_builder.py
 │   ├── watermark.py
 │   ├── metadata.py
+|   ├── path_builder.py
 │   └── exceptions.py
 │
 ├── config/
 │   └── tables.yaml                 # Single source of truth
 │
 └── README.md
+```
 
+---
 
-⚙️ Configuration (YAML-Driven)
-All table definitions, schemas, load types, and business logic dependencies are defined in tables.yaml.
-Example (Bronze)
+## ⚙️ Configuration (YAML-Driven)
+
+All table definitions, schemas, load types, and business logic dependencies are defined in `tables.yaml`.
+
+### Example – Bronze Configuration
+```yaml
 bronze:
   orders:
     catalog: brazillian_e_commerce
@@ -79,216 +108,157 @@ bronze:
     table_name: orders
     load_type: incremental
     watermark_column: order_purchase_timestamp
+```
 
-Why this matters:
+### ✅ Why this matters
+- No hardcoded table names in code
+- Switching source systems requires **YAML change only**
+- Supports **Unity Catalog** & multi-environment setups
 
+---
 
-No hardcoded table names in code
+## 🚀 Entry Point (main.py)
 
-
-Switching source systems requires YAML change only
-
-
-Supports Unity Catalog / multiple environments
-
-
-
-🚀 Entry Point (main.py)
 A single unified entry point controls the entire pipeline.
+
+```python
 from brazillian_e_commerce.main import run
 
-# Run full bronze ingestion
-run("bronze")
+run("bronze")                         # Full bronze ingestion
+run("silver", "orders")               # Single silver table
+run("gold")                           # Gold layer
+run("mart", "seller_performance")     # Specific business requirement
+```
 
-# Run single silver table
-run("silver", "orders")
+### Supported Layers
+- `bronze` → Ingest
+- `silver` → Refine
+- `gold`   → Model
+- `mart`   → Business analytics
 
-# Run gold layer
-run("gold")
+---
 
-# Run specific business requirement
-run("mart", "seller_performance")
+## 🟫 Bronze Layer (Ingest)
+**Purpose:** Raw ingestion with minimal transformation.
 
-Supported Layers
+**Features**
+- Full & incremental loads
+- Watermark-based ingestion
+- Metadata enrichment
+- Append vs overwrite handled dynamically
 
-
-bronze → Ingest
-
-
-silver → Refine
-
-
-gold → Model
-
-
-mart → Business analytics
-
-
-
-🟫 Bronze Layer (Ingest)
-Purpose: Raw ingestion with minimal transformation.
-Features
-
-
-Full & incremental loads
-
-
-Watermark-based ingestion
-
-
-Metadata enrichment
-
-
-Append vs overwrite handled dynamically
-
-
+```python
 run("bronze")
 run("bronze", "orders")
+```
 
+---
 
-⚪ Silver Layer (Refine)
-Purpose: Data quality & standardization.
-Operations
+## ⚪ Silver Layer (Refine)
+**Purpose:** Data quality & standardization.
 
+**Operations**
+- Type casting
+- Column renaming
+- Null handling
+- Schema stabilization
 
-Type casting
-
-
-Column renaming
-
-
-Null handling
-
-
-Schema stabilization
-
-
+```python
 run("silver")
 run("silver", "payments")
+```
 
+---
 
-🟨 Gold Layer (Model)
-Purpose: Business-ready dimensional modeling.
-Models Built
-Dimensions
+## 🟨 Gold Layer (Model)
+**Purpose:** Business-ready dimensional modeling.
 
+### Dimensions
+- dim_customers
+- dim_products
+- dim_sellers
+- dim_date
 
-dim_customers
+### Facts
+- fact_orders
+- fact_sales
+- fact_reviews
+- fact_payments
 
-
-dim_products
-
-
-dim_sellers
-
-
-dim_date
-
-
-Facts
-
-
-fact_orders
-
-
-fact_sales
-
-
-fact_reviews
-
-
-fact_payments
-
-
+```python
 run("gold")
 run("gold", "fact_sales")
+```
 
+---
 
-🟦 Mart Layer (Business Requirements)
+## 🟦 Mart Layer (Business Requirements)
 Final analytical tables answering real business questions.
-Implemented BRs
-BRMart TableDescriptionBR-1sales_performanceSales trend & revenueBR-2order_delivery_summaryDelivery performanceBR-3customer_analyticsCustomer behaviorBR-4seller_performanceSeller KPIsBR-5product_category_performanceCategory trendsBR-6payment_analyticsPayment insightsBR-7customer_satisfaction_and_reviewsReviews & satisfaction
+
+| BR | Mart Table | Description |
+|----|-----------|-------------|
+| BR-1 | sales_performance | Sales trend & revenue |
+| BR-2 | order_delivery_summary | Delivery performance |
+| BR-3 | customer_analytics | Customer behavior |
+| BR-4 | seller_performance | Seller KPIs |
+| BR-5 | product_category_performance | Category trends |
+| BR-6 | payment_analytics | Payment insights |
+| BR-7 | customer_satisfaction_and_reviews | Reviews & satisfaction |
+
+```python
 run("mart")
 run("mart", "payment_analytics")
+```
 
+---
 
-❗ Error Handling
-Custom, user-friendly exceptions are implemented:
+## ❗ Error Handling
+
+Custom, user-friendly exceptions:
+```python
 class PipelineException(Exception): ...
 class ConfigError(PipelineException): ...
 class DataReadError(PipelineException): ...
 class DataWriteError(PipelineException): ...
 class TransformationError(PipelineException): ...
+```
 
-Example Error Message
+**Example**
+```
 [Bronze] Failed reading source table 'orders'
 Reason: Table not found
+```
 
+---
 
-🧪 Debugging & Observability
+## 🧪 Debugging & Observability
+- Strategic `print()` statements
+- Row counts before & after transformations
+- Clear source → target visibility
+- Beginner & reviewer friendly
 
+---
 
-Strategic print() statements added
+## 🛠 Build & Install (Wheel)
 
-
-Row counts before & after transformations
-
-
-Clear source → target visibility
-
-
-Ideal for beginners & reviewers
-
-
-
-🛠 Build & Install (Wheel)
+```bash
 pip install build
 python -m build
 pip install dist/brazillian_e_commerce-0.1.0-py3-none-any.whl
+```
 
+---
 
-🧠 Key Learnings
+## 🧠 Key Learnings
+- Medallion architecture in practice
+- Config-driven pipelines
+- Incremental ingestion
+- Dimensional modeling
+- Business-first data design
+- Production-grade structure
 
+---
 
-Medallion architecture in practice
-
-
-Config-driven pipelines
-
-
-Incremental ingestion
-
-
-Dimensional modeling
-
-
-Business-first data design
-
-
-Production-grade structure
-
-
-
-👤 Author
-Vignesh S
+## 👤 Author
+**Vignesh S**  
 Aspiring Data Engineer | PySpark | Databricks | SQL
-
-If you want next:
-
-
-📄 Architecture diagram image
-
-
-🎤 Interview explanation version
-
-
-🧪 Test checklist
-
-
-📈 Performance optimizations
-
-
-🔁 Logging instead of print
-
-
-Just tell me 💙
