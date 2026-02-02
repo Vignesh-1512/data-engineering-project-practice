@@ -20,27 +20,8 @@ The pipeline processes the **Brazilian E-Commerce (Olist) dataset** end-to-end a
 ## 🧱 Architecture (Medallion)
 
 ```
-SOURCE (Kaggle / Unity Catalog)
-        |
-        v
-+----------------+
-|     BRONZE     |  Raw ingestion (incremental / full)
-+----------------+
-        |
-        v
-+----------------+
-|     SILVER     |  Cleaned, typed, standardized
-+----------------+
-        |
-        v
-+----------------+
-|      GOLD      |  Fact & Dimension models
-+----------------+
-        |
-        v
-+----------------+
-|      MART      |  Business Requirements (BR-1 → BR-7)
-+----------------+
+<img width="1024" height="1536" alt="ChatGPT Image Jan 30, 2026, 06_51_49 PM" src="https://github.com/user-attachments/assets/669ce17f-acec-4843-bec0-7b970d9dbd05" />
+
 ```
 
 ---
@@ -48,48 +29,8 @@ SOURCE (Kaggle / Unity Catalog)
 ## 📂 Project Structure
 
 ```
-brazillian_e_commerce/
-│
-├── main.py                         # Single entry point
-│
-├── bronze/                         # Bronze layer
-│   └── ingest.py
-│
-├── silver/                         # Silver layer
-│   └── refine.py
-│
-├── gold/                           # Gold modeling
-│   └── model.py
-│
-├── mart/                           # Business marts
-│   ├── mart_runner.py
-|   ├── transform_sales_performance.py
-|   ├── transform_order_delivery_summary.py
-|   ├── transform_customer_analytics.py
-|   ├── transform_seller_perfromance.py
-|   ├── transform_product_category_performance.py
-|   ├── transform_payment_analytics.py
-|   ├── transform_customer_satisfaction_and_reviews.py
-│   └── builders.py
-│
-├── utils/                          # Reusable utilities
-│   ├── spark_session.py
-│   ├── config_loader.py
-│   ├── file_read.py
-│   ├── file_hive.py
-│   ├── data_cast.py
-│   ├── data_prep.py
-│   ├── fact_builder.py
-│   ├── dim_builder.py
-│   ├── watermark.py
-│   ├── metadata.py
-|   ├── path_builder.py
-│   └── exceptions.py
-│
-├── config/
-│   └── tables.yaml                 # Single source of truth
-│
-└── README.md
+<img width="1024" height="1536" alt="ChatGPT Image Feb 2, 2026, 05_22_10 PM" src="https://github.com/user-attachments/assets/b4322eba-7a0b-4109-8d8e-ada1b550a5cc" />
+
 ```
 
 ---
