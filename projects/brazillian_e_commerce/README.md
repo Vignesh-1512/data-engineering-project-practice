@@ -20,7 +20,7 @@ The pipeline processes the **Brazilian E-Commerce (Olist) dataset** end-to-end a
 ## 🧱 Architecture (Medallion)
 
 ```
-![Medallion Architecture](https://github.com/user-attachments/assets/669ce17f-acec-4843-bec0-7b970d9dbd05)
+<img width="1024" height="1536" alt="ChatGPT Image Jan 8, 2026, 11_18_37 AM" src="https://github.com/user-attachments/assets/669ce17f-acec-4843-bec0-7b970d9dbd05" />
 
 ```
 
