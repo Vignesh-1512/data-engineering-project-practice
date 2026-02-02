@@ -19,19 +19,19 @@ The pipeline processes the **Brazilian E-Commerce (Olist) dataset** end-to-end a
 
 ## 🧱 Architecture (Medallion)
 
-```
+
 <img width="1024" height="1536" alt="ChatGPT Image Jan 8, 2026, 11_18_37 AM" src="https://github.com/user-attachments/assets/669ce17f-acec-4843-bec0-7b970d9dbd05" />
 
-```
+
 
 ---
 
 ## 📂 Project Structure
 
-```
+
 <img width="1024" height="1536" alt="ChatGPT Image Feb 2, 2026, 05_22_10 PM" src="https://github.com/user-attachments/assets/b4322eba-7a0b-4109-8d8e-ada1b550a5cc" />
 
-```
+
 
 ---
 
