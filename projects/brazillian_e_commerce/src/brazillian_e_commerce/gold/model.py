@@ -10,7 +10,7 @@ from brazillian_e_commerce.utils.path_builder import build_fqn
 def run_model(
     layer: str, 
     table_name: str | None = None,
-    mode: str ="overwrite"    
+    mode: str | None = None     
 ):
 
 
@@ -30,7 +30,6 @@ def run_model(
         TransformationError: If fact/dim build fails
         DataWriteError: If write to gold fails
     """
-
     try:
         spark = get_spark()
         config = load_config("tables.yaml")[layer]
@@ -81,7 +80,7 @@ def run_model(
         write_table(
             df=df,
             target_table=target_fqn,
-            mode=mode,
+            mode=config.get("write_mode","overwrite"),
             overwrite_schema=True
         )
         print(f"  ✅ Gold table created : {target_fqn}")

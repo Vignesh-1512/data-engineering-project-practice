@@ -5,7 +5,7 @@ Utility module for writing Spark DataFrames to Hive/Unity Catalog tables.
 def write_table(
     df,
     target_table: str,
-    mode: str = "overwrite",
+    mode: str,
     format: str = "delta",
     overwrite_schema: bool = False
 ):
@@ -22,11 +22,11 @@ def write_table(
         DataWriteError: If write operation fails
     """
 
-
     writer = (
         df.write
         .mode(mode)
         .format(format)
+        .option("mergeSchema", "true")
     )
 
     if overwrite_schema:

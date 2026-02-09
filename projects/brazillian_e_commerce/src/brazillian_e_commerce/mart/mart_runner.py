@@ -31,17 +31,18 @@ def run_mart(
 
     spark = get_spark()
     config = load_config("tables.yaml")[layer]
+    
 
     print("\n[MART EXECUTION STARTED]")
 
     if br_name:
-        _run_single_table(spark, br_name, config[br_name],mode)
+        _run_single_table(spark, br_name, config[br_name],config)
     else:
         for name, cfg in config.items():
-            _run_single_table(spark, name, cfg,mode)
+            _run_single_table(spark, name, cfg,config)
 
 
-def _run_single_table(spark, name, cfg,mode):
+def _run_single_table(spark, name, cfg,layer_config):
     try:
         tables = {
             alias: spark.read.table(
@@ -67,5 +68,9 @@ def _run_single_table(spark, name, cfg,mode):
         cfg["table_name"]
     )
 
-    write_table(df, target_fqn, mode=mode)
+    write_table(
+                df, 
+                target_fqn, 
+                mode=layer_config.get("write_mode","overwrite"),
+                overwrite_schema=True)
     print(f"  ✅ BR completed : {target_fqn}")

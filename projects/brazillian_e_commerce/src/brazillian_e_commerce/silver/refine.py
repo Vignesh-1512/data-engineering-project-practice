@@ -1,3 +1,7 @@
+from pyspark.sql.window import Window
+from pyspark.sql import functions as F
+
+
 from brazillian_e_commerce.utils.data_cast import cast_columns
 from brazillian_e_commerce.utils.data_prep import clean_data
 from brazillian_e_commerce.utils.file_hive import write_table
@@ -5,7 +9,7 @@ from brazillian_e_commerce.utils.config_loader import load_config
 from brazillian_e_commerce.utils.spark_session import get_spark
 from brazillian_e_commerce.utils.exceptions import ConfigError, DataWriteError
 from brazillian_e_commerce.utils.path_builder import build_fqn
-
+from brazillian_e_commerce.utils.merge_table import merge_upsert
 
 def run_refine(
         layer: str, 
@@ -70,15 +74,31 @@ def run_refine(
 
         print(f"  Rows after     : {df.count()}")
 
+        # ----------------------
+        # Dynamic dedupe
+        # ----------------------
+        merge_key = cfg.get("merge_key")
+        order_col = cfg.get("dedupe_order_by", "ingestion_ts")
+
+        window = Window.partitionBy(merge_key) \
+                    .orderBy(F.col(order_col).desc())
+
+        df = (
+            df.withColumn("rn", F.row_number().over(window))
+            .filter("rn = 1")
+            .drop("rn")
+        )
+
+        print(f"  Rows after dedupe : {df.count()}")
+
         try:
-            write_table(
+            merge_upsert(
+                spark=spark,
                 df=df,
                 target_table=target_fqn,
-                mode=mode,
-                overwrite_schema=True
+                merge_key=merge_key
             )
-
-            print(f"  ✅ Silver load completed for {name}")
+            print(f"  ✅ Silver merge completed for {name}")
 
         except Exception as e:
             raise DataWriteError(

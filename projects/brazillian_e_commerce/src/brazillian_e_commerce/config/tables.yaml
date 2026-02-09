@@ -1,6 +1,7 @@
 # Bronze Congig
 
 bronze:
+  write_mode: append
   orders:
     catalog: brazillian_e_commerce
     source_schema: source
@@ -9,6 +10,7 @@ bronze:
     source_table: orders
     load_type: incremental
     watermark_column: order_purchase_timestamp
+    merge_key: order_id
 
   order_items:
     catalog: brazillian_e_commerce
@@ -18,6 +20,7 @@ bronze:
     source_table: order_items
     load_type: incremental
     watermark_column: shipping_limit_date
+
 
   products:
     catalog: brazillian_e_commerce
@@ -51,6 +54,7 @@ bronze:
     source_table: reviews
     load_type: incremental
     watermark_column: review_creation_date
+    merge_key: review_id
 
   payments:
     catalog: brazillian_e_commerce
@@ -71,6 +75,9 @@ silver:
     target_schema: silver
     table_name: silver_orders
     source_table: bronze_orders
+
+    merge_key: order_id
+    dedupe_order_by: ingestion_ts
 
     casts:
       order_purchase_timestamp: timestamp
@@ -145,6 +152,8 @@ silver:
 
 
 gold:
+  write_mode: overwrite
+
   dim_customers:
     type: dim
     catalog: brazillian_e_commerce
@@ -232,6 +241,7 @@ gold:
 # Final Config:
 
 mart:
+  write_mode: overwrite
 
   sales_performance:
     business_requirement: BR-1

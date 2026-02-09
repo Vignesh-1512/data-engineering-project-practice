@@ -6,7 +6,8 @@ from brazillian_e_commerce.mart.mart_runner import run_mart
 
 def run(layer: str, 
         table_name: str | None = None,
-        mode: str = "overwrite"
+        load_type:str | None = None,
+        mode: str | None = None
 ):  
 
     print("=" * 80)
@@ -18,7 +19,7 @@ def run(layer: str,
 
 
     if layer == "bronze":
-        run_ingest(layer,table_name,mode)
+        run_ingest(layer, table_name, load_type, mode)
     elif layer == "silver":
         run_refine(layer,table_name,mode)
     elif layer == "gold":
