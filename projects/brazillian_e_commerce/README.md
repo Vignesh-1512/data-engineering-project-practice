@@ -14,6 +14,7 @@ The pipeline processes the **Brazilian E-Commerce (Olist) dataset** end-to-end a
 - Reusable utilities (ingest, refine, model, mart)
 - Production-style error handling
 - Designed for **Databricks Unity Catalog**
+- **ROW-count & data-quality validations** at each layer
 
 ---
 
@@ -55,6 +56,7 @@ bronze:
 - No hardcoded table names in code
 - Switching source systems requires **YAML change only**
 - Supports **Unity Catalog** & multi-environment setups
+- Enables **repeatable and auditable pielines**
 
 ---
 
@@ -87,6 +89,20 @@ run("mart", "seller_performance")     # Specific business requirement
 - Watermark-based ingestion
 - Metadata enrichment
 - Append vs overwrite handled dynamically
+- Bronze table treated as **immutable source of truth**
+
+### ⏱ Dynamic Incremental Ingestion
+Incremental ingestion is handled dynamically using watermark columns defined in YAML.
+
+- Each table defines its own `watermark_column`
+- The pipeline automatically fetches the **last processed timestamp**
+- Only new or changed records are ingested on subsequent runs
+- Full vs incremental behavior is resolved at runtime
+
+This allows the same codebase to handle:
+- First-time full loads
+- Subsequent incremental loads
+- Table-specific ingestion strategies
 
 ```python
 run("bronze")
@@ -103,7 +119,26 @@ run("bronze", "orders")
 - Column renaming
 - Null handling
 - Schema stabilization
+- Deterministic transformation
+  
+### 🔄 Delta MERGE Strategy (Silver Layer)
+Silver tables are written using **Delta Lake MERGE** to support incremental refinement.
 
+- MERGE is based on **business keys** (e.g., `order_id`)
+- Supports idempotent re-runs
+- Prevents duplicate inserts during incremental loads
+- Updates existing records when source data changes
+
+> Note: Silver MERGE updates/inserts records.  
+> Row-level deletes are applied only when explicitly defined.
+
+This ensures Silver remains **incremental, replayable, and production-safe**.
+
+**🔍 Data Quality Guarantees**
+- **Row-count validation performed on tables(not dataframes)**
+- Explicit checks for **business-key uniqueness**
+- silver tables are safe to rebuild, bronze is never modified
+  
 ```python
 run("silver")
 run("silver", "payments")
@@ -126,6 +161,11 @@ run("silver", "payments")
 - fact_reviews
 - fact_payments
 
+**Design Principles**
+- Clear grain definition
+- No accidental row multiplication
+- Facts validations against silver counts
+  
 ```python
 run("gold")
 run("gold", "fact_sales")
@@ -176,7 +216,18 @@ Reason: Table not found
 - Strategic `print()` statements
 - Row counts before & after transformations
 - Clear source → target visibility
-- Beginner & reviewer friendly
+- cache cleared between rebuilds when required
+- Beginner & reviewer friendly yet **production-realistic**
+
+---
+### 📊 Table-Level Validation
+To avoid misleading metrics, row counts are always validated **after data is written to Delta tables**, not on intermediate DataFrames.
+
+- Prevents false positives during MERGE-based pipelines
+- Ensures table state reflects actual data
+- Used consistently across Silver and Gold layers
+
+This mirrors real-world production validation practices.
 
 ---
 
@@ -193,10 +244,12 @@ pip install dist/brazillian_e_commerce-0.1.0-py3-none-any.whl
 ## 🧠 Key Learnings
 - Medallion architecture in practice
 - Config-driven pipelines
-- Incremental ingestion
-- Dimensional modeling
+- Incremental ingestion patterns
+- Delta Lake behaviour (MERGE vs Overwrite)
+- importance of **table-level-validation**
+- Dimensional modeling fundamentals
 - Business-first data design
-- Production-grade structure
+- Production-grade structure & debugging mindset
 
 ---
 
