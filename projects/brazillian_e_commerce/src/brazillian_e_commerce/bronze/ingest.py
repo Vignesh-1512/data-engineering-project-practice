@@ -87,10 +87,16 @@ def run_ingest(
 
             # ---------- OPTIONAL GENERATOR ----------
             # if you want synthetic incremental rows
-            if df.isEmpty():
+            if final_load_type == "incremental" and df.isEmpty():
                 print("  No new source rows → using generator")
                 schema = spark.read.table(source_fqn).schema
-                df = input_data_generator(spark, name, schema)
+                df = input_data_generator(
+                                    spark=spark,
+                                    schema=schema,
+                                    target_table=target_fqn,
+                                    merge_key=cfg.get("merge_key"),
+                                    rows=2
+                                )
 
 
             print(f"  Rows read       : {df.count()}")
@@ -109,7 +115,7 @@ def run_ingest(
             write_table(
                 df=df,
                 target_table=target_fqn,
-                mode=config.get("write_mode","append")
+                mode=write_mode
             )
 
             print(f"  Bronze load completed for {name}")

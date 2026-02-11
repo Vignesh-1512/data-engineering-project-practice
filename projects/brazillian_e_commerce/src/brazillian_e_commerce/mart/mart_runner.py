@@ -71,6 +71,6 @@ def _run_single_table(spark, name, cfg,layer_config):
     write_table(
                 df, 
                 target_fqn, 
-                mode=layer_config.get("write_mode","overwrite"),
-                overwrite_schema=True)
+                mode=layer_config.get("write_mode","overwrite")
+                )
     print(f"  ✅ BR completed : {target_fqn}")

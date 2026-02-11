@@ -1,7 +1,6 @@
 from pyspark.sql.window import Window
 from pyspark.sql import functions as F
 
-
 from brazillian_e_commerce.utils.data_cast import cast_columns
 from brazillian_e_commerce.utils.data_prep import clean_data
 from brazillian_e_commerce.utils.file_hive import write_table
@@ -11,94 +10,137 @@ from brazillian_e_commerce.utils.exceptions import ConfigError, DataWriteError
 from brazillian_e_commerce.utils.path_builder import build_fqn
 from brazillian_e_commerce.utils.merge_table import merge_upsert
 
+
+# =====================================================
+# Helpers
+# =====================================================
+
+def _normalize_keys(keys):
+    """Always return list[str] or None"""
+    if not keys:
+        return None
+    return [keys] if isinstance(keys, str) else keys
+
+
+def _dedupe(df, keys, order_col):
+    """Apply window-based dedupe"""
+    window = (
+        Window
+        .partitionBy(*keys)
+        .orderBy(F.col(order_col).desc())
+    )
+
+    return (
+        df.withColumn("rn", F.row_number().over(window))
+          .filter("rn = 1")
+          .drop("rn")
+    )
+
+
+# =====================================================
+# MAIN
+# =====================================================
+
 def run_refine(
-        layer: str, 
+        layer: str,
         table_name: str | None = None,
-        mode: str ="overwrite"
+        mode: str = "overwrite"
 ):
-
-
     """
-    Runs the refinement (Silver) pipeline.
+    Silver refinement layer.
 
-    Reads data from bronze schema, applies casting, renaming,
-    and data quality rules, then writes to silver schema.
-
-    Args:
-        layer (str): Pipeline layer name (silver)
-        table_name (str | None): Specific table or all tables
-        mode (str): Write mode for target table
-
-    Raises:
-        ConfigError: If silver configuration fails
-        TransformationError: If casting or cleaning fails
-        DataWriteError: If write to silver fails
+    Strategy:
+    --------
+    If merge_key exists  -> incremental MERGE
+    If merge_key missing -> full OVERWRITE
     """
 
+    # -------------------------------------------------
+    # Load config
+    # -------------------------------------------------
     try:
         spark = get_spark()
         config = load_config("tables.yaml")[layer]
-
         print("\n[SILVER REFINEMENT STARTED]")
+
+        mode = mode or "overwrite" 
 
     except Exception as e:
         raise ConfigError(f"Failed to load {layer} config. Reason: {str(e)}")
 
     tables = {table_name: config[table_name]} if table_name else config
 
+    # -------------------------------------------------
+    # Process each table
+    # -------------------------------------------------
     for name, cfg in tables.items():
-        source_fqn = build_fqn(
-            cfg["catalog"],
-            cfg["source_schema"],
-            cfg["source_table"]
-        )
-
-        target_fqn = build_fqn(
-            cfg["catalog"],
-            cfg["target_schema"],
-            cfg["table_name"]
-        )
-
-        print(f"\n→ Refining table : {name}")
-        print(f"  Source table   : {source_fqn}")
-        print(f"  Target table   : {target_fqn}")
-
-        df = spark.read.table(source_fqn)
-        print(f"  Rows before    : {df.count()}")
-
-        print(f"  Applying casts : {list(cfg['casts'].keys())}")
-        df = cast_columns(df, cfg.get("casts", {}))
-
-        print(f"  Applying clean rules")
-        df = clean_data(df, cfg.get("clean_rules", {}))
-
-        print(f"  Rows after     : {df.count()}")
-
-        # ----------------------
-        # Dynamic dedupe
-        # ----------------------
-        merge_key = cfg.get("merge_key")
-        order_col = cfg.get("dedupe_order_by", "ingestion_ts")
-
-        window = Window.partitionBy(merge_key) \
-                    .orderBy(F.col(order_col).desc())
-
-        df = (
-            df.withColumn("rn", F.row_number().over(window))
-            .filter("rn = 1")
-            .drop("rn")
-        )
-
-        print(f"  Rows after dedupe : {df.count()}")
 
         try:
-            merge_upsert(
-                spark=spark,
-                df=df,
-                target_table=target_fqn,
-                merge_key=merge_key
+            source_fqn = build_fqn(
+                cfg["catalog"],
+                cfg["source_schema"],
+                cfg["source_table"]
             )
-            print(f"  ✅ Silver merge completed for {name}")
+
+            target_fqn = build_fqn(
+                cfg["catalog"],
+                cfg["target_schema"],
+                cfg["table_name"]
+            )
+
+            print(f"\n→ Refining table : {name}")
+            print(f"  Source : {source_fqn}")
+            print(f"  Target : {target_fqn}")
+
+            # -------------------------------------------------
+            # Read
+            # -------------------------------------------------
+            df = spark.read.table(source_fqn)
+
+            before = df.count()
+            print(f"  Rows before : {before}")
+
+            # -------------------------------------------------
+            # Transform
+            # -------------------------------------------------
+            df = cast_columns(df, cfg.get("casts", {}))
+            df = clean_data(df, cfg.get("clean_rules", {}))
+
+            after_clean = df.count()
+            print(f"  Rows after clean : {after_clean}")
+
+            # -------------------------------------------------
+            # Dedupe (only for incremental tables)
+            # -------------------------------------------------
+            merge_keys = _normalize_keys(cfg.get("merge_key"))
+            order_col = cfg.get("dedupe_order_by", "ingestion_ts")
+
+            if merge_keys:
+                df = _dedupe(df, merge_keys, order_col)
+                after_dedupe = df.count()
+                print(f"  Rows after dedupe : {after_dedupe}")
+
+            # -------------------------------------------------
+            # Write strategy
+            # -------------------------------------------------
+            if merge_keys:
+                # incremental
+                merge_upsert(
+                    spark_session=spark,
+                    source_dataframe=df,
+                    target_table_name=target_fqn,
+                    merge_keys=merge_keys
+                )
+                print("  ✅ Merge completed")
+
+            else:
+                # full load
+                write_table(
+                    df=df,
+                    target_table=target_fqn,
+                    mode=mode
+                )
+                print("  ✅ Overwrite completed")
 
         except Exception as e:
             raise DataWriteError(

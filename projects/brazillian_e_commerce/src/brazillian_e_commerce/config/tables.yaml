@@ -20,6 +20,9 @@ bronze:
     source_table: order_items
     load_type: incremental
     watermark_column: shipping_limit_date
+    merge_key: 
+      - order_id
+      - order_item_id
 
 
   products:
@@ -54,7 +57,10 @@ bronze:
     source_table: reviews
     load_type: incremental
     watermark_column: review_creation_date
-    merge_key: review_id
+    merge_key:
+      - order_id
+      - review_id
+
 
   payments:
     catalog: brazillian_e_commerce
@@ -100,6 +106,9 @@ silver:
     table_name: silver_order_items
     source_table: bronze_order_items
 
+    merge_key: [order_id,order_item_id]
+    dedupe_order_by: ingestion_ts
+
   products:
     catalog: brazillian_e_commerce
     source_schema: bronze
@@ -127,6 +136,11 @@ silver:
     target_schema: silver
     table_name: silver_reviews
     source_table: bronze_reviews
+
+    merge_key:
+      - order_id
+      - review_id
+    dedupe_order_by: ingestion_ts
 
   payments:
     catalog: brazillian_e_commerce

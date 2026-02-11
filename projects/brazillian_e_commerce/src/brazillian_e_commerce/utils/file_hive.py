@@ -1,35 +1,39 @@
 """
 Utility module for writing Spark DataFrames to Hive/Unity Catalog tables.
+Spark Connect + Unity Catalog safe implementation.
 """
 
 def write_table(
     df,
     target_table: str,
     mode: str,
-    format: str = "delta",
-    overwrite_schema: bool = False
+    format: str = "delta"
 ):
-    """
-    Writes a DataFrame to a Hive/Unity Catalog table.
+    spark = df.sparkSession
 
-    Args:
-        df (DataFrame): Data to be written
-        target_table (str): Fully qualified target table name
-        mode (str): overwrite | append
-        overwrite_schema (bool): Whether to overwrite schema
+    # -----------------------------
+    # APPEND  → standard save
+    # -----------------------------
+    if mode == "append":
+        (
+            df.write
+              .format(format)
+              .mode("append")
+              .option("mergeSchema", "true")
+              .saveAsTable(target_table)
+        )
 
-    Raises:
-        DataWriteError: If write operation fails
-    """
+    # -----------------------------
+    # OVERWRITE → safe replace
+    # -----------------------------
+    elif mode == "overwrite":
+        df.createOrReplaceTempView("_tmp_write")
 
-    writer = (
-        df.write
-        .mode(mode)
-        .format(format)
-        .option("mergeSchema", "true")
-    )
+        spark.sql(f"""
+            CREATE OR REPLACE TABLE {target_table}
+            USING {format}
+            AS SELECT * FROM _tmp_write
+        """)
 
-    if overwrite_schema:
-        writer = writer.option("overwriteSchema", "true")
-
-    writer.saveAsTable(target_table)
+    else:
+        raise ValueError(f"Unsupported mode: {mode}")

@@ -2,28 +2,66 @@ from delta.tables import DeltaTable
 
 
 def merge_upsert(
-    spark,
-    df,
-    target_table: str,
-    merge_key: str
+    spark_session,
+    source_dataframe,
+    target_table_name: str,
+    merge_keys
 ):
     """
-    Performs UPSERT using Delta merge.
-    Used only in Silver layer.
+    Perform UPSERT (MERGE) into Delta table.
+
+    Parameters
+    ----------
+    spark_session : SparkSession
+    source_dataframe : DataFrame
+        New/changed records to merge
+    target_table_name : str
+        Fully qualified table name
+    merge_keys : str | list[str]
+        Primary key(s) for merge
+        - single column  -> "order_id"
+        - composite key  -> ["order_id", "order_item_id"]
     """
 
-    # first load → create table
-    if not spark.catalog.tableExists(target_table):
-        df.write.format("delta").mode("overwrite").saveAsTable(target_table)
+
+    # -------------------------------------------------
+    # First load → create table
+    # -------------------------------------------------
+    if not spark_session.catalog.tableExists(target_table_name):
+        (
+            source_dataframe.write
+            .format("delta")
+            .option("mergeSchema", "true")
+            .mode("overwrite")
+            .saveAsTable(target_table_name)
+        )
         return
 
-    delta = DeltaTable.forName(spark, target_table)
+    delta_target_table = DeltaTable.forName(spark_session, target_table_name)
 
+    # -------------------------------------------------
+    # Build dynamic merge condition
+    # -------------------------------------------------
+    if isinstance(merge_keys, list):
+
+        merge_condition = " AND ".join(
+            [
+                f"target.{column_name} = source.{column_name}"
+                for column_name in merge_keys
+            ]
+        )
+
+    else:
+        merge_condition = f"target.{merge_keys} = source.{merge_keys}"
+
+    # -------------------------------------------------
+    # Execute MERGE (UPSERT)
+    # -------------------------------------------------
     (
-        delta.alias("t")
+        delta_target_table.alias("target")
         .merge(
-            df.alias("s"),
-            f"t.{merge_key} = s.{merge_key}"
+            source_dataframe.alias("source"),
+            merge_condition
         )
         .whenMatchedUpdateAll()
         .whenNotMatchedInsertAll()

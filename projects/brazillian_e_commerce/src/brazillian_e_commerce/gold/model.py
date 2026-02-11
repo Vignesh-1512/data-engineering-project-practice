@@ -80,8 +80,7 @@ def run_model(
         write_table(
             df=df,
             target_table=target_fqn,
-            mode=config.get("write_mode","overwrite"),
-            overwrite_schema=True
+            mode=config.get("write_mode","overwrite")
         )
         print(f"  ✅ Gold table created : {target_fqn}")
 
