@@ -1,0 +1,74 @@
+pre_landing:
+
+  transactions:
+
+    translation:
+      lookup_table: retail_medallion_lakehouse.translation_dataset.language_converter
+      source_column: Column_Name
+      target_column: Convert_Into
+      apply_on:
+        - root
+        - items
+
+    input_path: "https://raw.githubusercontent.com/..."
+    file_type: json
+
+    schema:
+      transaction_id: string
+      customer:
+        cust_id: int
+        name: string
+        contacts:
+          __type__: array
+          fields:
+            type: string
+            value: string
+      items:
+        __type__: array
+        fields:
+          product: string
+          qty: int
+          price: double
+      transaction_ts: string
+      location: string
+
+    explode_columns:
+      - items
+
+    contacts:
+      parent: "customer.contacts"
+      type_field: "type"
+      value_field: "value"
+      mappings:
+        email: "customer_email"
+        phone: "customer_phone"
+
+    select_columns:
+      - "transaction_id"
+      - "customer.cust_id as customer_id"
+      - "customer.name as customer_name"
+      - "item.product as product"
+      - "item.qty as quantity"
+      - "item.price as price"
+      - "transaction_ts"
+      - "location"
+
+
+# landing:
+#   write_mode: append
+
+#   transactions:
+#     target_schema: landing
+#     table_name: landing_transactions
+#     load_type: full
+#     partition_columns:
+#       - ingestion_date
+
+#     audit_columns:
+#       add_ingestion_ts: true
+#       add_source_layer: true
+#       add_dataset_name: true
+
+#     validation:
+#       required_columns:
+#         - transaction_id

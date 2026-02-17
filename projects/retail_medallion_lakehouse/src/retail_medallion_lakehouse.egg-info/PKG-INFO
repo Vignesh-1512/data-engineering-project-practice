@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: retail_medallion_lakehouse
+Version: 0.1.2
+Summary: Retail Medallion Lakehouse Data Engineering Project
+Requires-Python: >=3.8
+Requires-Dist: pyspark
+Requires-Dist: pyyaml
+Requires-Dist: requests

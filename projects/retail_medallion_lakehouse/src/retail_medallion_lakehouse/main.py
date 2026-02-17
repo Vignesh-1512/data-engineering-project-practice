@@ -1,0 +1,36 @@
+from retail_medallion_lakehouse.layers.pre_landing import run_pre_landing
+# from retail_medallion_lakehouse.layers.landing import run_landing
+# from retail_medallion_lakehouse.layers.silver import run_silver
+
+
+def run(layer: str, dataset: str = None):
+    """
+    Main orchestration function.
+    Routes execution based on layer.
+    """
+
+    print("\n===================================")
+    print(f"🚀 PIPELINE STARTED | Layer: {layer}")
+    print("===================================")
+
+    try:
+        if layer == "pre_landing":
+            return run_pre_landing(layer=layer, dataset_name=dataset)
+
+        # elif layer == "landing":
+        #     return run_landing(layer=layer, dataset_name=dataset)
+
+        # elif layer == "silver":
+        #     return run_silver(layer=layer, dataset_name=dataset)
+
+        else:
+            raise ValueError(f"Unsupported layer: {layer}")
+
+    except Exception as e:
+        print("\n❌ Pipeline Failed")
+        print("Error Type:", type(e).__name__)
+        print("Error Message:", str(e))
+        raise
+
+    finally:
+        print("\n🏁 PIPELINE FINISHED\n")

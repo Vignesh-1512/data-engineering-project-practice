@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "retail_medallion_lakehouse"
+version = "0.1.2"
+description = "Retail Medallion Lakehouse Data Engineering Project"
+requires-python = ">=3.8"
+
+dependencies = [
+    "pyspark",
+    "pyyaml",
+    "requests"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+retail_medallion_lakehouse = ["config/*.yaml"]
