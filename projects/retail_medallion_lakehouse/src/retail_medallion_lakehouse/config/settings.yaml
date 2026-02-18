@@ -1,37 +1,41 @@
+# ==========================================================
+# 📥 PRE-LANDING LAYER
+# ==========================================================
+
 pre_landing:
+  write_mode: append
 
   transactions:
 
+    # ----------------------------
+    # 🎯 Target Table (UC Managed)
+    # ----------------------------
+    catalog: retail_medallion_lakehouse
+    target_schema: pre_landing
+    table_name: transactions
+
+    # ----------------------------
+    # 📡 Source Info
+    # ----------------------------
+    input_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data/transactional_dataset.json"
+    file_type: json
+
+    # ----------------------------
+    # 🌍 Translation Config
+    # ----------------------------
     translation:
-      lookup_table: retail_medallion_lakehouse.translation_dataset.language_converter
+      catalog: retail_medallion_lakehouse
+      schema: translation_dataset
+      table_name: language_converter
       source_column: Column_Name
       target_column: Convert_Into
       apply_on:
         - root
         - items
 
-    input_path: "https://raw.githubusercontent.com/..."
-    file_type: json
-
-    schema:
-      transaction_id: string
-      customer:
-        cust_id: int
-        name: string
-        contacts:
-          __type__: array
-          fields:
-            type: string
-            value: string
-      items:
-        __type__: array
-        fields:
-          product: string
-          qty: int
-          price: double
-      transaction_ts: string
-      location: string
-
+    # ----------------------------
+    # 🔄 Transformations
+    # ----------------------------
     explode_columns:
       - items
 
@@ -43,32 +47,75 @@ pre_landing:
         email: "customer_email"
         phone: "customer_phone"
 
+    # ----------------------------
+    # 📑 Final Column Selection
+    # ----------------------------
     select_columns:
       - "transaction_id"
       - "customer.cust_id as customer_id"
       - "customer.name as customer_name"
-      - "item.product as product"
+      - "item.product_id"
+      - "item.product_name"
       - "item.qty as quantity"
-      - "item.price as price"
+      - "item.unit_price as price"
       - "transaction_ts"
       - "location"
 
 
-# landing:
-#   write_mode: append
 
-#   transactions:
-#     target_schema: landing
-#     table_name: landing_transactions
-#     load_type: full
-#     partition_columns:
-#       - ingestion_date
 
-#     audit_columns:
-#       add_ingestion_ts: true
-#       add_source_layer: true
-#       add_dataset_name: true
+# ==========================================================
+# 📥 LANDING LAYER
+# ==========================================================
+landing:
+    write_mode: overwrite
 
-#     validation:
-#       required_columns:
-#         - transaction_id
+    transactions:
+        #------------------------------------
+        # SOURCE
+        #------------------------------------
+        catalog: retail_medallion_lakehouse
+        source_schema: pre_landing
+        source_table: transactions
+        #------------------------------------
+        # TARGET
+        #------------------------------------
+        target_schema: landing
+        target_table: landing_transactions
+
+        #------------------------------------
+        # CAST RULE
+        #------------------------------------
+        casts:
+            transaction_ts: timestamp
+            price: double
+            quantity: bigint
+        
+        #------------------------------------
+        # VALIDATION
+        #------------------------------------
+        not_null_columns:
+            - transaction_id
+            - product_id
+        
+        positive_columns:
+            - price
+            - quantity
+        trim_strings: true
+
+        #------------------------------------
+        # AUDIT + LINEAGE
+        #------------------------------------
+
+        overwrite_audit: true
+        lineage_value: pre_landing
+
+        #------------------------------------
+        # PARTITION
+        #------------------------------------
+        partition_column: transaction_ts
+        partition_type: year
+
+        primary_keys:
+            - transaction_id
+            - product_id

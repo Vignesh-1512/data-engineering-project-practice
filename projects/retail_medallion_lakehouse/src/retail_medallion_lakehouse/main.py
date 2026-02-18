@@ -1,5 +1,5 @@
-from retail_medallion_lakehouse.layers.pre_landing import run_pre_landing
-# from retail_medallion_lakehouse.layers.landing import run_landing
+from retail_medallion_lakehouse.pre_landing.pre_landing import run_pre_landing
+from retail_medallion_lakehouse.landing.run_landing import run_landing
 # from retail_medallion_lakehouse.layers.silver import run_silver
 
 
@@ -15,10 +15,10 @@ def run(layer: str, dataset: str = None):
 
     try:
         if layer == "pre_landing":
-            return run_pre_landing(layer=layer, dataset_name=dataset)
+            return run_pre_landing(layer_name=layer, dataset_name=dataset)
 
-        # elif layer == "landing":
-        #     return run_landing(layer=layer, dataset_name=dataset)
+        elif layer == "landing":
+            return run_landing(layer_name=layer, dataset_name=dataset)
 
         # elif layer == "silver":
         #     return run_silver(layer=layer, dataset_name=dataset)

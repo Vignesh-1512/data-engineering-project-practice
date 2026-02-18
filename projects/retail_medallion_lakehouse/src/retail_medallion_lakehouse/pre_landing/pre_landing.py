@@ -1,186 +1,249 @@
-from pyspark.sql.functions import col, explode, expr
+from pyspark.sql.functions import (
+    col,
+    explode,
+    expr,
+    current_timestamp,
+    transform,
+    struct
+)
+from pyspark.sql.functions import element_at
+
 from retail_medallion_lakehouse.utils.spark import get_spark
-from retail_medallion_lakehouse.utils.file_read import read_data
-from retail_medallion_lakehouse.utils.cleaner import basic_trim
 from retail_medallion_lakehouse.utils.config_loader import load_config
-from retail_medallion_lakehouse.utils.schema_builder import build_schema
-from retail_medallion_lakehouse.utils.exceptions import LayerNotFoundException
+from retail_medallion_lakehouse.utils.file_read import read_data
+from retail_medallion_lakehouse.utils.file_hive import write_table
+from retail_medallion_lakehouse.utils.path_builder import build_path
 
-def run_pre_landing(layer: str, dataset_name: str = None):
+
+def run_pre_landing(
+        layer_name: str,
+        dataset_name: str | None = None
+):
     """
-    Executes Pre-Landing layer.
-    
+    Pre-Landing ingestion.
+
+    - Reads JSON from API
+    - Applies column translation (German → English)
+    - Explodes nested items
+    - Extracts contacts
+    - Adds ingestion timestamp
+    - Writes to Unity Catalog table
+
     Supports:
-    - Single dataset execution
-    - All datasets execution (if dataset_name is None)
+    - Single dataset run
+    - All datasets run
     """
 
-    print("\n==============================")
-    print(f"🚀 Starting Layer: {layer}")
-    print("==============================")
+    spark = get_spark(app_name=f"retail_{layer_name}")
 
     try:
-        # --------------------------------
-        # 1️⃣ Load Full Config
-        # --------------------------------
-        full_config = load_config()
-
-        if layer not in full_config:
-            raise LayerNotFoundException(f"❌ Layer '{layer}' not found in configuration.")
-
-        layer_config = full_config[layer]
-
-        # --------------------------------
-        # 2️⃣ Initialize Spark
-        # --------------------------------
-        spark = get_spark("PreLandingLayer")
-        print("✅ Spark Session Initialized")
-
-        # --------------------------------
-        # 3️⃣ Run Single Dataset
-        # --------------------------------
-        if dataset_name:
-
-            if dataset_name not in layer_config:
-                raise ValueError(f"❌ Dataset '{dataset_name}' not found under layer '{layer}'.")
-
-            return _process_dataset(spark, dataset_name, layer_config[dataset_name])
-
-        # --------------------------------
-        # 4️⃣ Run All Datasets
-        # --------------------------------
-        else:
-            print("🔄 No dataset specified → Running ALL datasets")
-            results = {}
-
-            for ds_name, ds_config in layer_config.items():
-                print(f"\n-----------------------------------")
-                print(f"📦 Processing Dataset: {ds_name}")
-                print("-----------------------------------")
-
-                results[ds_name] = _process_dataset(spark, ds_name, ds_config)
-
-            return results
-
-    except Exception as e:
-        print("\n❌ ERROR in Pre-Landing Layer")
-        print("Error Type:", type(e).__name__)
-        print("Error Message:", str(e))
-        raise
-
-    finally:
-        print("\n🏁 Pre-Landing Execution Completed\n")
-
-
-# ======================================================
-# 🔹 Internal Dataset Processor
-# ======================================================
-
-def _process_dataset(spark, dataset_name: str, config: dict):
-
-    try:
-        print(f"📥 Reading dataset: {dataset_name}")
-
-        # --------------------------------
-        # 1️⃣ Schema Handling
-        # --------------------------------
-        schema = None
-
-        if "schema" in config:
-            print("🔧 Building schema from YAML...")
-            schema = build_schema(config["schema"])
-
-        # --------------------------------
-        # 2️⃣ Read Data
-        # --------------------------------
-        df = read_data(
-            spark,
-            config["input_path"],
-            config["file_type"],
-            schema
+        layer_config = load_config()[layer_name]
+    except Exception as error:
+        raise Exception(
+            f"Failed to load config for layer '{layer_name}'. "
+            f"Reason: {str(error)}"
         )
 
-        print("✅ Data Read Successfully")
-        print("Initial Row Count:", df.count())
+    print("\n[PRE-LANDING STARTED]")
 
-        # --------------------------------
-        # 3️⃣ Explode Configured Arrays
-        # --------------------------------
-        for column in config.get("explode_columns", []):
-            if column in df.columns:
-                print(f"🔄 Exploding column: {column}")
-                df = df.withColumn("item", explode(col(column)))
+    # -------------------------------------------------------
+    # Determine which datasets to process
+    # -------------------------------------------------------
+    if dataset_name:
+        datasets_to_process = {dataset_name: layer_config[dataset_name]}
+    else:
+        datasets_to_process = {
+            name: config
+            for name, config in layer_config.items()
+            if name != "write_mode"
+        }
 
-        # --------------------------------
-        # 4️⃣ Extract Contacts
-        # --------------------------------
-        contacts_cfg = config.get("contacts")
 
-        if contacts_cfg:
-            print("📞 Extracting Contact Fields")
+    # -------------------------------------------------------
+    # Process each dataset
+    # -------------------------------------------------------
+    for dataset, dataset_config in datasets_to_process.items():
 
-            parent = contacts_cfg["parent"]
-            type_field = contacts_cfg["type_field"]
-            value_field = contacts_cfg["value_field"]
+        try:
+            print(f"\n→ Processing dataset : {dataset}")
 
-            for contact_type, output_col in contacts_cfg["mappings"].items():
-                print(f"   ➜ Extracting {contact_type} → {output_col}")
+            write_mode = layer_config["write_mode"]
 
-                df = df.withColumn(
-                    output_col,
-                    expr(
-                        f"filter({parent}, x -> x.{type_field} = '{contact_type}')[0].{value_field}"
-                    )
+            # -----------------------------
+            # READ SOURCE JSON
+            # -----------------------------
+            dataframe = read_data(
+                spark=spark,
+                path=dataset_config["input_path"],
+                file_type=dataset_config["file_type"],
+                schema=None
+            )
+
+            print(f"  Rows read : {dataframe.count()}")
+            dataframe.printSchema()
+            dataframe.show(5, truncate=False)
+
+            # -----------------------------
+            # COLUMN TRANSLATION
+            # -----------------------------
+            translation_config = dataset_config.get("translation")
+
+            if translation_config:
+
+                print("  Applying column translation...")
+
+                translation_table_name = build_path(
+                    translation_config["catalog"],
+                    translation_config["schema"],
+                    translation_config["table_name"]
                 )
 
-        # --------------------------------
-        # 5️⃣ Dynamic Column Selection
-        # --------------------------------
-        print("📌 Selecting Required Columns")
+                translation_dataframe = spark.table(
+                    translation_table_name
+                )
 
-        select_exprs = []
+                column_mapping = {
+                    row[translation_config["source_column"]]:
+                    row[translation_config["target_column"]]
+                    for row in translation_dataframe.collect()
+                }
 
-        for field in config["select_columns"]:
-            if " as " in field:
-                original, alias = field.split(" as ")
-                print(f"   ➜ Renaming {original} → {alias}")
-                select_exprs.append(col(original).alias(alias))
-            else:
-                select_exprs.append(col(field))
+                # Root level rename
+                for column_name in dataframe.columns:
+                    if column_name in column_mapping:
+                        dataframe = dataframe.withColumnRenamed(
+                            column_name,
+                            column_mapping[column_name]
+                        )
 
-        if contacts_cfg:
-            for output_col in contacts_cfg["mappings"].values():
-                select_exprs.append(col(output_col))
+                # Nested rename inside 'items'
+                if "items" in dataframe.columns:
 
-        df = df.select(*select_exprs)
+                    # Get items struct fields from schema (outside column)
+                    item_fields=dataframe.schema["items"].dataType.elementType.fieldNames()
 
-        # --------------------------------
-        # 6️⃣ Basic Cleaning
-        # --------------------------------
-        print("🧹 Applying Basic Trim Cleaning")
-        df = basic_trim(df)
+                    dataframe = dataframe.withColumn(
+                        "items",
+                        transform(
+                            col("items"),
+                            lambda nested_row: struct(
+                                *[
+                                    nested_row[field_name].alias(
+                                        column_mapping.get(field_name, field_name)
+                                    )
+                                    for field_name in item_fields
+                                ]
+                            )
+                        )
+                    )
 
-        # --------------------------------
-        # 7️⃣ Stats & Preview
-        # --------------------------------
-        print("\n📊 Dataset Statistics")
-        total_rows = df.count()
-        distinct_rows = df.distinct().count()
+            # -----------------------------
+            # EXPLODE ITEMS
+            # -----------------------------
+            if "items" in dataset_config.get("explode_columns", []):
 
-        print("Total Rows   :", total_rows)
-        print("Distinct Rows:", distinct_rows)
+                dataframe = dataframe.withColumn(
+                    "item",
+                    explode(col("items"))
+                )
 
-        if total_rows != distinct_rows:
-            print("⚠ Duplicate records detected!")
+            # -----------------------------
+            # EXTRACT CONTACT DETAILS
+            # -----------------------------
+            contacts_config = dataset_config.get("contacts")
 
-        print("\n🔎 Data Preview:")
-        df.show(5, truncate=False)
-        df.printSchema()
+            if contacts_config:
 
-        return df
+                print("  Extracting contact details...")
 
-    except Exception as e:
-        print(f"\n❌ ERROR while processing dataset '{dataset_name}'")
-        print("Error Type:", type(e).__name__)
-        print("Error Message:", str(e))
-        raise
+                parent_column = contacts_config["parent"]
+                type_field = contacts_config["type_field"]
+                value_field = contacts_config["value_field"]
+
+                for contact_type, output_column in contacts_config["mappings"].items():
+                    dataframe = dataframe.withColumn(
+                                            output_column,
+                                            element_at(
+                                                expr(
+                                                    f"filter(`{parent_column}`, x -> x.{type_field} = '{contact_type}')"
+                                                ),
+                                                1
+                                            )[value_field]
+                    )
+
+
+            # -----------------------------
+            # SELECT FINAL COLUMNS
+            # -----------------------------
+            selected_columns = []
+
+            existing_columns = dataframe.columns
+
+            for column_expression in dataset_config["select_columns"]:
+                if " as " in column_expression:
+                    original_column, alias_name = column_expression.split(" as ")
+                else:
+                    original_column = column_expression
+                    alias_name = None
+
+                # Split first level
+                root_column = original_column.split(".")[0]
+
+                if original_column in existing_columns:
+                    # Flat column like "customer.cust_id"
+                    column_obj = col(f"`{original_column}`")
+                elif root_column in existing_columns:
+                    # Struct navigation like "item.product_id"
+                    column_obj = col(original_column)
+                else:
+                    column_obj = col(original_column)
+
+                if alias_name:
+                    column_obj = column_obj.alias(alias_name)
+
+                selected_columns.append(column_obj)
+
+
+
+
+            if contacts_config:
+                for output_column in contacts_config["mappings"].values():
+                    selected_columns.append(col(output_column))
+
+            dataframe = dataframe.select(*selected_columns)
+
+            # -----------------------------
+            # ADD INGESTION TIMESTAMP
+            # -----------------------------
+            dataframe = dataframe.withColumn(
+                "ingest_ts",
+                current_timestamp()
+            )
+
+            # -----------------------------
+            # BUILD TARGET TABLE NAME
+            # -----------------------------
+            target_table_name = build_path(
+                dataset_config["catalog"],
+                dataset_config["target_schema"],
+                dataset_config["table_name"]
+            )
+
+            # -----------------------------
+            # WRITE TO UNITY CATALOG
+            # -----------------------------
+            write_table(
+                df=dataframe,
+                target_table=target_table_name,
+                mode=write_mode
+            )
+
+            print(f"  Pre-landing completed for {dataset}")
+
+        except Exception as error:
+            raise Exception(
+                f"[Pre-Landing] Failed for dataset '{dataset}'. "
+                f"Reason: {str(error)}"
+            )
+
+    print("\n[PRE-LANDING COMPLETED]")

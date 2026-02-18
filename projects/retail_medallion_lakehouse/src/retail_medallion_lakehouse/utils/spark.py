@@ -1,20 +1,15 @@
 from pyspark.sql import SparkSession
 
 
-def get_spark(app_name: str, master: str = None) -> SparkSession:
+def get_spark(app_name: str):
+    """
+    Returns active Spark session inside Databricks.
+    Does NOT create a new Spark session.
+    """
 
-    builder = SparkSession.builder.appName(app_name)
+    spark = SparkSession.getActiveSession()
 
-    if master:
-        builder = builder.master(master)
-
-    spark = (
-        builder
-        .config("spark.sql.shuffle.partitions", "200")
-        .config("spark.sql.adaptive.enabled", "true")
-        .config("spark.databricks.delta.schema.autoMerge.enabled", "true")
-        .getOrCreate()
-    )
+    if spark is None:
+        spark = SparkSession.builder.getOrCreate()
 
     return spark
-    
