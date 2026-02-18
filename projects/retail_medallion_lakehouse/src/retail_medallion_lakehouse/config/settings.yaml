@@ -62,6 +62,49 @@ pre_landing:
       - "location"
 
 
+  payments:
+    catalog: retail_medallion_lakehouse
+    target_schema: pre_landing
+    table_name: payments
+
+    input_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data/payment_dataset.json"
+    file_type: json
+    load_type: full
+
+    select_columns:
+      - payment_id
+      - transaction_id
+      - customer_id
+      - amount_gross
+      - discount_percent
+      - discount_amount
+      - shipping_fee
+      - amount_charged
+      - currency
+      - payment_method
+      - payment_gateway
+      - payment_status
+      - gateway_response_code
+      - payment_ts
+      - lineage_source
+
+  products:
+    catalog: retail_medallion_lakehouse
+    target_schema: pre_landing
+    table_name: products
+
+    input_path: "/mnt/data/product_dataset.json"
+    file_type: json
+    load_type: full
+
+    select_columns:
+      - product_id
+      - product_name
+      - category
+      - brand
+      - price
+      - cost
+      - created_ts
 
 
 # ==========================================================
@@ -119,3 +162,58 @@ landing:
         primary_keys:
             - transaction_id
             - product_id
+
+    payments:
+        # -------------------------
+        # SOURCE
+        # -------------------------
+        catalog: retail_medallion_lakehouse
+        source_schema: pre_landing
+        source_table: payments
+
+        # -------------------------
+        # TARGET
+        # -------------------------
+        target_schema: landing
+        target_table: landing_payments
+
+        # -------------------------
+        # CAST RULES
+        # -------------------------
+        casts:
+            payment_ts: timestamp
+            amount_gross: double
+            discount_percent: double
+            discount_amount: double
+            shipping_fee: double
+            amount_charged: double
+
+        # -------------------------
+        # VALIDATIONS
+        # -------------------------
+        not_null_columns:
+            - payment_id
+            - transaction_id
+
+        positive_columns:
+            - amount_charged
+
+        trim_strings: true
+
+        # -------------------------
+        # DEDUP (OPTIONAL BUT SAFE)
+        # -------------------------
+        primary_keys:
+            - payment_id
+
+        # -------------------------
+        # AUDIT + LINEAGE
+        # -------------------------
+        overwrite_audit: true
+        lineage_value: pre_landing
+
+        # -------------------------
+        # PARTITION
+        # -------------------------
+        partition_column: payment_ts
+        partition_type: year
