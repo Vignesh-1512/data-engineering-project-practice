@@ -313,22 +313,35 @@ refinement:
     source_schema: unification
     source_table: unification_retail
 
-    # 👇 Business columns to retain
+    # 👇 Business-ready curated columns
     select_columns:
       - transaction_id
+      - payment_id
       - customer_id
+      - customer_name
       - product_id
+      - product_name_master
+      - category
       - quantity
       - price
-      - payment_amount
-      - transaction_ts
+      - amount_gross
+      - discount_percent
+      - discount_amount
+      - shipping_fee
+      - amount_charged
+      - gst_percent
+      - currency
       - payment_method
-      - product_name_master
+      - payment_status
+      - transaction_ts
+      - payment_ts
 
-    # 👇 Business calculations to apply
+    # 👇 Enable calculations dynamically
     calculations:
-      financial: true
-      allocation: true
+      financial:
+        enabled: true
+      allocation:
+        enabled: true
 
     target_schema: refinement
     target_table: refined_retail
