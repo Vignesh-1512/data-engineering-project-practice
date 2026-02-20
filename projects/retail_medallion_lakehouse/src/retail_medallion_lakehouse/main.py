@@ -1,6 +1,6 @@
 from retail_medallion_lakehouse.pre_landing.pre_landing import run_pre_landing
 from retail_medallion_lakehouse.landing.run_landing import run_landing
-# from retail_medallion_lakehouse.layers.silver import run_silver
+from retail_medallion_lakehouse.unification.run_unification import run_unification
 
 
 def run(layer: str, dataset: str = None):
@@ -20,8 +20,8 @@ def run(layer: str, dataset: str = None):
         elif layer == "landing":
             return run_landing(layer_name=layer, dataset_name=dataset)
 
-        # elif layer == "silver":
-        #     return run_silver(layer=layer, dataset_name=dataset)
+        elif layer == "unification":
+            return run_unification(layer_name=layer, dataset_name=dataset)
 
         else:
             raise ValueError(f"Unsupported layer: {layer}")

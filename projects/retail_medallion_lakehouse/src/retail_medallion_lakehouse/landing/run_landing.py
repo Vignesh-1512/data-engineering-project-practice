@@ -161,13 +161,18 @@ def run_landing(layer_name: str, dataset_name: str | None = None):
             # -------------------------------------------------
             # WRITE USING COMMON FUNCTION
             # -------------------------------------------------
+            dynamic_flag = False
+
+            if partition_by and write_mode=="overwrite":
+                dynamic_flag= True
+
             write_table(
                 df=df,
                 target_table=target_table,
                 mode=write_mode,
                 format="delta",
-                partition_by=partition_by,
-                dynamic_partition=True
+                partition_by=partition_by if partition_by else None,
+                dynamic_partition=dynamic_flag
             )
 
             print("  Landing write completed successfully.")

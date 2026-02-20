@@ -89,22 +89,24 @@ pre_landing:
       - lineage_source
 
   products:
+
     catalog: retail_medallion_lakehouse
     target_schema: pre_landing
     table_name: products
 
-    input_path: "/mnt/data/product_dataset.json"
+    input_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data/product_dataset.json"
     file_type: json
     load_type: full
 
+
+    # Direct select
     select_columns:
-      - product_id
-      - product_name
-      - category
-      - brand
-      - price
-      - cost
-      - created_ts
+      - "product_id"
+      - "name"
+      - "category"
+      - "tags"
+      - "price"
+      - "gst_percent"
 
 
 # ==========================================================
@@ -217,3 +219,122 @@ landing:
         # -------------------------
         partition_column: payment_ts
         partition_type: year
+
+    products:
+
+        # ------------------------------------
+        # SOURCE
+        # ------------------------------------
+        catalog: retail_medallion_lakehouse
+        source_schema: pre_landing
+        source_table: products
+
+        # ------------------------------------
+        # TARGET
+        # ------------------------------------
+        target_schema: landing
+        target_table: landing_products
+
+        # ------------------------------------
+        # CAST RULES
+        # ------------------------------------
+        casts:
+            price: double
+            gst_percent: bigint
+
+        # ------------------------------------
+        # VALIDATION
+        # ------------------------------------
+        not_null_columns:
+            - product_id
+
+        positive_columns:
+            - price
+            - gst_percent
+
+        trim_strings: true
+
+        # ------------------------------------
+        # AUDIT + LINEAGE
+        # ------------------------------------
+        overwrite_audit: true
+        lineage_value: pre_landing
+
+        # ------------------------------------
+        # NO PARTITION NEEDED
+        # ------------------------------------
+        partition_column: null
+        partition_type: null
+
+
+#-------------------------------------------
+#
+#  UNIFICATION LAYER
+#
+#-------------------------------------------
+
+unification:
+  write_mode: overwrite
+
+  unified_dataset:
+
+    catalog: retail_medallion_lakehouse
+    source_schema: landing
+
+    transactions_table: landing_transactions
+    payments_table: landing_payments
+    products_table: landing_products
+
+    joins:
+      - right: payments
+        key: transaction_id
+        type: left
+
+      - right: products
+        key: product_id
+        type: left
+        
+
+    target_schema: unification
+    target_table: unification_retail
+
+    partition_column: transaction_ts
+    partition_type: year
+
+    overwrite_audit: true
+    lineage_value: landing
+
+refinement:
+  write_mode: overwrite
+
+  refined_dataset:
+
+    catalog: retail_medallion_lakehouse
+    source_schema: unification
+    source_table: unification_retail
+
+    # 👇 Business columns to retain
+    select_columns:
+      - transaction_id
+      - customer_id
+      - product_id
+      - quantity
+      - price
+      - payment_amount
+      - transaction_ts
+      - payment_method
+      - product_name_master
+
+    # 👇 Business calculations to apply
+    calculations:
+      financial: true
+      allocation: true
+
+    target_schema: refinement
+    target_table: refined_retail
+
+    partition_column: transaction_ts
+    partition_type: year
+
+    overwrite_audit: true
+    lineage_value: unification

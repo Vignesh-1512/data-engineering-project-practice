@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: retail_medallion_lakehouse
-Version: 0.2.0
+Version: 0.3.2
 Summary: Retail Medallion Lakehouse Data Engineering Project
 Requires-Python: >=3.8
 Requires-Dist: pyspark

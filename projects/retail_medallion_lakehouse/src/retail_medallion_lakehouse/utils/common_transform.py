@@ -1,7 +1,10 @@
+import re
+
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, trim, lit
 from pyspark.sql.window import Window
 from pyspark.sql.functions import row_number
+from collections import Counter
 
 
 # ==========================================================
@@ -105,3 +108,53 @@ def add_lineage_column(df: DataFrame, previous_layer: str) -> DataFrame:
         df = df.withColumn(f"lineage_{next_index}", lit(previous_layer))
 
     return df
+
+
+# ==========================================================
+# 🧹 DROP PARTITION COLUMNS (TECHNICAL CLEANER)
+# ==========================================================
+def drop_partition_columns(df: DataFrame) -> DataFrame:
+    """
+    Drops technical partition columns like partition_year,
+    partition_month, partition_day if present.
+    """
+
+    partition_cols = [
+        c for c in df.columns
+        if c.startswith("partition_")
+    ]
+
+    if partition_cols:
+        df = df.drop(*partition_cols)
+
+    return df
+
+#=================================================================
+#   Drop all Lineage columns
+#=================================================================
+
+def drop_lineage_columns(df: DataFrame) -> DataFrame:
+    lineage_cols = [c for c in df.columns if re.match(r"^lineage", c)]
+    return df.drop(*lineage_cols)
+
+
+
+# ==========================================================
+# 🔥 GENERIC SAFE JOIN (NO HARDCODING)
+# ==========================================================
+def safe_join(left_df, right_df, join_cols, join_type="left"):
+
+    if isinstance(join_cols, str):
+        join_cols = [join_cols]
+
+    left_cols = set(left_df.columns)
+    right_cols = set(right_df.columns)
+
+    overlap_cols = left_cols.intersection(right_cols)
+    duplicate_cols = overlap_cols - set(join_cols)
+
+    if duplicate_cols:
+        print(f"[SAFE_JOIN] Dropping duplicate columns from right_df: {duplicate_cols}")
+        right_df = right_df.drop(*duplicate_cols)
+
+    return left_df.join(right_df, join_cols, join_type)
