@@ -2,6 +2,7 @@ from retail_medallion_lakehouse.pre_landing.pre_landing import run_pre_landing
 from retail_medallion_lakehouse.landing.run_landing import run_landing
 from retail_medallion_lakehouse.unification.run_unification import run_unification
 from retail_medallion_lakehouse.refinement.run_refinement import run_refinement
+from retail_medallion_lakehouse.publish.run_publish import run_publish
 
 def run(layer: str, dataset: str = None):
     """
@@ -25,7 +26,8 @@ def run(layer: str, dataset: str = None):
         
         elif layer == "refinement":
             return run_refinement(layer_name=layer,dataset_name=dataset)
-
+        elif layer == "publish":
+            return run_publish(layer_name=layer,dataset_name=dataset)
         else:
             raise ValueError(f"Unsupported layer: {layer}")
 

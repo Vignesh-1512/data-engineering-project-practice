@@ -319,6 +319,9 @@ refinement:
       - payment_id
       - customer_id
       - customer_name
+      - customer_email
+      - customer_phone
+      - location
       - product_id
       - product_name_master
       - category
@@ -351,3 +354,108 @@ refinement:
 
     overwrite_audit: true
     lineage_value: unification
+
+#-------------------------------------------
+#
+#  PUBLISH LAYER
+#
+#-------------------------------------------
+
+publish:
+  write_mode: overwrite
+
+  catalog: retail_medallion_lakehouse
+  source_schema: refinement
+  source_table: refined_retail
+
+  target_schema: publish
+
+  dimensions:
+
+    customer_dimension:
+      target_table: customer_dimension
+      natural_key: customer_id
+      surrogate_key: customer_sk
+      columns:
+        - customer_id
+        - customer_name
+        - customer_email
+        - customer_phone
+        - location
+
+    product_dimension:
+      target_table: product_dimension
+      natural_key: product_id
+      surrogate_key: product_sk
+      columns:
+        - product_id
+        - product_name_master
+        - category
+        - price
+        - gst_percent
+
+  facts:
+
+    cleaned_fact_transactions:
+      target_table: cleaned_fact_transactions
+      columns:
+        - transaction_id
+        - customer_id
+        - product_id
+        - quantity
+        - net_amount
+        - gst_amount
+        - final_invoice_amount
+        - transaction_ts
+      partition_column: transaction_ts
+      partition_type: year
+
+    payment_fact:
+      target_table: payment_fact
+      columns:
+        - payment_id
+        - transaction_id
+        - customer_id
+        - amount_charged
+        - payment_method
+        - payment_status
+        - allocation_ratio
+        - payment_ts
+
+  aggregates:
+
+    daily_sales_summary:
+      target_table: daily_sales_summary
+      group_by:
+        - transaction_ts
+      date_trunc: day
+      metrics:
+        total_sales: sum(final_invoice_amount)
+        total_transactions: count_distinct(transaction_id)
+        total_customers: count_distinct(customer_id)
+
+    product_performance:
+      target_table: product_performance
+      group_by:
+        - product_id
+      metrics:
+        total_quantity_sold: sum(quantity)
+        total_revenue: sum(final_invoice_amount)
+
+    customer_lifetime_value:
+      target_table: customer_lifetime_value
+      group_by:
+        - customer_id
+      metrics:
+        total_spent: sum(final_invoice_amount)
+        total_transactions: count_distinct(transaction_id)
+        average_order_value: avg(final_invoice_amount)
+
+    payment_success_rate:
+      target_table: payment_success_rate
+      group_by:
+        - payment_method
+      metrics:
+        success_count: count_if(payment_status == SUCCESS)
+        failure_count: count_if(payment_status != SUCCESS)
+

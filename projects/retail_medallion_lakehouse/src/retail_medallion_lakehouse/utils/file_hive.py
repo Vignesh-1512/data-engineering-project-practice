@@ -31,9 +31,18 @@ def write_table(
         print(f"   Mode               : {mode}")
         print(f"   Partition Columns  : {partition_by}")
         print(f"   Dynamic Overwrite  : {dynamic_partition}")
+        
+        spark = df.sparkSession
+
+        # ------------------------------------------------
+        # 🔥 DEV FIX: Drop table before overwrite
+        # ------------------------------------------------
+        if mode == "overwrite":
+            print("   Dropping existing table (dev-safe overwrite)")
+            spark.sql(f"DROP TABLE IF EXISTS {target_table}")
 
         writer = df.write.format(format).mode(mode)
-
+        
         # ---------------------------------------
         # Dynamic Partition Overwrite
         # ---------------------------------------

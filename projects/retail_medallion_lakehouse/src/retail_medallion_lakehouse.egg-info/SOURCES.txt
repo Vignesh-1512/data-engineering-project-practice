@@ -12,6 +12,8 @@ src/retail_medallion_lakehouse/landing/__init__.py
 src/retail_medallion_lakehouse/landing/run_landing.py
 src/retail_medallion_lakehouse/pre_landing/__init__.py
 src/retail_medallion_lakehouse/pre_landing/pre_landing.py
+src/retail_medallion_lakehouse/publish/__init__.py
+src/retail_medallion_lakehouse/publish/run_publish.py
 src/retail_medallion_lakehouse/refinement/__init__.py
 src/retail_medallion_lakehouse/refinement/run_refinement.py
 src/retail_medallion_lakehouse/unification/__init__.py
@@ -25,5 +27,6 @@ src/retail_medallion_lakehouse/utils/exceptions.py
 src/retail_medallion_lakehouse/utils/file_hive.py
 src/retail_medallion_lakehouse/utils/file_read.py
 src/retail_medallion_lakehouse/utils/path_builder.py
+src/retail_medallion_lakehouse/utils/publish_builders.py
 src/retail_medallion_lakehouse/utils/schema_builder.py
 src/retail_medallion_lakehouse/utils/spark.py
