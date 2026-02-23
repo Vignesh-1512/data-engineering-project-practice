@@ -85,27 +85,30 @@ def deduplicate_latest(
 
 
 # ==========================================================
-# 🧬 LINEAGE (Previous Layers Only)
+# 🧬 CUMULATIVE LINEAGE
 # ==========================================================
-def add_lineage_column(df: DataFrame, previous_layer: str) -> DataFrame:
-    """
-    Adds lineage columns dynamically.
-    Stores only previous layer names.
-    
-    Example:
-    Landing → lineage_1 = pre_landing
-    Unification → lineage_1 = pre_landing
-                    lineage_2 = landing
-    """
+def add_lineage_column(df, current_layer: str):
 
-    lineage_cols = sorted([c for c in df.columns if c.startswith("lineage_")])
+    layer_order =[
+        "pre_landing",
+        "landing",
+        "unification",
+        "refinement",
+        "publish"
+    ]
 
-    if not lineage_cols:
-        # First lineage column
-        df = df.withColumn("lineage_1", lit(previous_layer))
-    else:
-        next_index = len(lineage_cols) + 1
-        df = df.withColumn(f"lineage_{next_index}", lit(previous_layer))
+    # Do NOT add lineage for pre_landing
+    if current_layer == "pre_landing":
+        return df
+
+    if current_layer not in layer_order:
+        raise Exception(f"Unknown layer: {current_layer}")
+
+    # Build lineage up to current layer
+    idx = layer_order.index(current_layer)
+    lineage_value = " -> ".join(layer_order[: idx + 1])
+
+    df = df.withColumn("lineage", lit(lineage_value))
 
     return df
 

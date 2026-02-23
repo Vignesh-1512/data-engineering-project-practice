@@ -157,6 +157,18 @@ def run_unification(layer_name: str, dataset_name: str | None = None):
                 )
 
             # ---------------------------------------------
+            # RESOLVE PRODUCT NAME DUPLICATION
+            # ---------------------------------------------
+            if "product_name" in unified_df.columns and \
+            "product_name_master" in unified_df.columns:
+
+                unified_df = unified_df.drop("product_name") \
+                                    .withColumnRenamed(
+                                        "product_name_master",
+                                        "product_name"
+                                    )
+
+            # ---------------------------------------------
             # OVERWRITE AUDIT COLUMN
             # ---------------------------------------------
             if config.get("overwrite_audit", False):

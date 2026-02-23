@@ -8,7 +8,13 @@ from pyspark.sql.functions import (
     count,
     when,
     to_date,
-    monotonically_increasing_id
+    min as spark_min,
+    max as spark_max,
+    round,
+    to_json,
+    array,
+    struct,
+    lit
 )
 
 
@@ -20,12 +26,28 @@ def build_dimension(df, config):
     dim_df = (
         df.select(*config["columns"])
           .dropDuplicates([config["natural_key"]])
-          .withColumn(
-              config["surrogate_key"],
-              monotonically_increasing_id()
-          )
-          .withColumn("ingest_ts", current_timestamp())
     )
+
+    # Special handling for customer contacts
+    if config["target_table"] == "customer_dimension":
+
+        dim_df = dim_df.withColumn(
+            "customer_contacts",
+            to_json(
+                array(
+                    struct(
+                        lit("email").alias("type"),
+                        col("customer_email").alias("value")
+                    ),
+                    struct(
+                        lit("phone").alias("type"),
+                        col("customer_phone").alias("value")
+                    )
+                )
+            )
+        ).drop("customer_email", "customer_phone")
+
+    dim_df = dim_df.withColumn("ingest_ts", current_timestamp())
 
     return dim_df
 
@@ -59,8 +81,8 @@ def build_aggregate(df, config):
 
     # Handle date truncation
     if config.get("date_trunc") == "day":
-        df = df.withColumn("sale_date", to_date(col(group_cols[0])))
-        group_cols = ["sale_date"]
+        df = df.withColumn("txn_date", to_date(col(group_cols[0])))
+        group_cols = ["txn_date"]
 
     grouped = df.groupBy(*group_cols)
     agg_exprs = []
@@ -79,14 +101,40 @@ def build_aggregate(df, config):
             column = expr[4:-1]
             agg_exprs.append(avg(column).alias(alias))
 
+        elif expr.startswith("min("):
+            column = expr[4:-1]
+            agg_exprs.append(spark_min(column).alias(alias))
+
+        elif expr.startswith("max("):
+            column = expr[4:-1]
+            agg_exprs.append(spark_max(column).alias(alias))
+
         elif expr.startswith("count_if("):
-            condition = expr[9:-1]  # e.g. payment_status == SUCCESS
+            condition = expr[9:-1]
             left, op, right = condition.split()
 
-            agg_exprs.append(
-                count(
-                    when(col(left) == right, True)
-                ).alias(alias)
-            )
+            right= right.strip("'")
+            
+            if op == "==":
+                agg_exprs.append(
+                    count(when(col(left) == right, True)).alias(alias)
+                )
+            elif op == "!=":
+                agg_exprs.append(
+                    count(when(col(left) != right, True)).alias(alias)
+                )
 
-    return grouped.agg(*agg_exprs)
+    result = grouped.agg(*agg_exprs)
+
+    # Add payment success percentages
+    if config["target_table"] == "payment_success_rate":
+
+        result = result.withColumn(
+            "success_rate_pct",
+            round(col("captured") / col("attempts") * 100, 2)
+        ).withColumn(
+            "failure_rate_pct",
+            round(col("failed") / col("attempts") * 100, 2)
+        )
+
+    return result

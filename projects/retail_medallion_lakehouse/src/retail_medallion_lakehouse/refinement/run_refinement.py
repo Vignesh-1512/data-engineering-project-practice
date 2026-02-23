@@ -100,7 +100,9 @@ def run_refinement(layer_name: str, dataset_name: str | None = None):
             if financial_cfg.get("enabled", False):
 
                 required_financial_cols = [
-                    "amount_gross",
+                    "transaction_id",
+                    "quantity",
+                    "price",
                     "discount_amount",
                     "shipping_fee",
                     "gst_percent"

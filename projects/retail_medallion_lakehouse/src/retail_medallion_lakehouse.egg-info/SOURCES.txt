@@ -1,3 +1,4 @@
+README.md
 pyproject.toml
 src/retail_medallion_lakehouse/__init__.py
 src/retail_medallion_lakehouse/main.py

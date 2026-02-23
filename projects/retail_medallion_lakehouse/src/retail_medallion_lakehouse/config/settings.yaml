@@ -153,7 +153,7 @@ landing:
         #------------------------------------
 
         overwrite_audit: true
-        lineage_value: pre_landing
+        lineage_value: landing
 
         #------------------------------------
         # PARTITION
@@ -212,7 +212,7 @@ landing:
         # AUDIT + LINEAGE
         # -------------------------
         overwrite_audit: true
-        lineage_value: pre_landing
+        lineage_value: landing
 
         # -------------------------
         # PARTITION
@@ -258,7 +258,7 @@ landing:
         # AUDIT + LINEAGE
         # ------------------------------------
         overwrite_audit: true
-        lineage_value: pre_landing
+        lineage_value: landing
 
         # ------------------------------------
         # NO PARTITION NEEDED
@@ -302,8 +302,14 @@ unification:
     partition_type: year
 
     overwrite_audit: true
-    lineage_value: landing
+    lineage_value: unification
 
+
+#-------------------------------------------
+#
+#  REFINEMENT LAYER
+#
+#-------------------------------------------
 refinement:
   write_mode: overwrite
 
@@ -323,7 +329,7 @@ refinement:
       - customer_phone
       - location
       - product_id
-      - product_name_master
+      - product_name
       - category
       - quantity
       - price
@@ -336,6 +342,7 @@ refinement:
       - currency
       - payment_method
       - payment_status
+      - payment_gateway
       - transaction_ts
       - payment_ts
 
@@ -344,7 +351,7 @@ refinement:
       financial:
         enabled: true
       allocation:
-        enabled: true
+        enabled: false
 
     target_schema: refinement
     target_table: refined_retail
@@ -353,7 +360,7 @@ refinement:
     partition_type: year
 
     overwrite_audit: true
-    lineage_value: unification
+    lineage_value: refinement
 
 #-------------------------------------------
 #
@@ -375,21 +382,20 @@ publish:
     customer_dimension:
       target_table: customer_dimension
       natural_key: customer_id
-      surrogate_key: customer_sk
+      
       columns:
         - customer_id
         - customer_name
         - customer_email
         - customer_phone
-        - location
 
     product_dimension:
       target_table: product_dimension
       natural_key: product_id
-      surrogate_key: product_sk
+      
       columns:
         - product_id
-        - product_name_master
+        - product_name
         - category
         - price
         - gst_percent
@@ -403,10 +409,16 @@ publish:
         - customer_id
         - product_id
         - quantity
-        - net_amount
-        - gst_amount
-        - final_invoice_amount
+        - price
+        - calculated_item_amount
+        - calculated_gst
+        - calculated_discount_allocation
+        - calculated_shipping_allocation
+        - calculated_final_amount
         - transaction_ts
+        - location
+        - payment_id
+        - payment_status
       partition_column: transaction_ts
       partition_type: year
 
@@ -416,10 +428,13 @@ publish:
         - payment_id
         - transaction_id
         - customer_id
+        - amount_gross
+        - discount_amount
+        - shipping_fee
         - amount_charged
         - payment_method
+        - payment_gateway
         - payment_status
-        - allocation_ratio
         - payment_ts
 
   aggregates:
@@ -430,32 +445,43 @@ publish:
         - transaction_ts
       date_trunc: day
       metrics:
-        total_sales: sum(final_invoice_amount)
-        total_transactions: count_distinct(transaction_id)
-        total_customers: count_distinct(customer_id)
+        orders: count_distinct(transaction_id)
+        gross_sales_incl_tax: sum(calculated_item_amount)
+        discount_total: sum(calculated_discount_allocation)
+        shipping_total: sum(calculated_shipping_allocation)
+        tax_total: sum(calculated_gst)
 
     product_performance:
       target_table: product_performance
       group_by:
         - product_id
+        - product_name
+        - category
       metrics:
         total_quantity_sold: sum(quantity)
-        total_revenue: sum(final_invoice_amount)
+        total_revenue: sum(calculated_final_amount)
 
     customer_lifetime_value:
       target_table: customer_lifetime_value
       group_by:
         - customer_id
+        - customer_name
       metrics:
-        total_spent: sum(final_invoice_amount)
-        total_transactions: count_distinct(transaction_id)
-        average_order_value: avg(final_invoice_amount)
+        order_count: count_distinct(transaction_id)
+        total_qty: sum(quantity)
+        lifetime_revenue: sum(calculated_final_amount)
+        first_purchase_dt: min(transaction_ts)
+        latest_purchase_dt: max(transaction_ts)
+        avg_order_value: avg(calculated_final_amount)
 
     payment_success_rate:
       target_table: payment_success_rate
       group_by:
         - payment_method
+        - payment_gateway
       metrics:
-        success_count: count_if(payment_status == SUCCESS)
-        failure_count: count_if(payment_status != SUCCESS)
+        attempts: count_distinct(payment_id)
+        captured: count_if(payment_status == 'SUCCESS')
+        failed: count_if(payment_status == 'FAILED')
+        refunded: count_if(payment_status == 'REFUNDED')
 
