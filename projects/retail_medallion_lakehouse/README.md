@@ -41,7 +41,8 @@ delivers:
 
 # 🧱 Architecture (Medallion Design)
 
-<img width="1536" height="1024" alt="ChatGPT Image Feb 24, 2026, 12_57_50 PM" src="https://github.com/user-attachments/assets/42f64583-ca37-40f6-8225-ca5bcee02677" />
+<img width="1024" height="1536" alt="ChatGPT Image Feb 24, 2026, 01_06_32 PM" src="https://github.com/user-attachments/assets/d9af8616-b1d7-4de7-b7c8-2f02ae959980" />
+
 
 
 ------------------------------------------------------------------------
