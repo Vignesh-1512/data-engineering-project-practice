@@ -49,10 +49,8 @@ delivers:
 
 # 📂 Project Structure
 
-retail_medallion_lakehouse/ │ ├── main.py ├── pre_landing/ ├── landing/
-├── unification/ ├── refinement/ ├── publish/ ├── utils/ │ ├──
-file_hive.py │ ├── common_transform.py │ ├── business_calculations.py │
-├── publish_builders.py └── config/ └── tables.yaml
+<img width="1024" height="1536" alt="ChatGPT Image Feb 24, 2026, 01_16_38 PM" src="https://github.com/user-attachments/assets/d4241375-9b14-4d84-a527-700aa4dd3500" />
+
 
 ------------------------------------------------------------------------
 
