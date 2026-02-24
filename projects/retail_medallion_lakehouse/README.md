@@ -35,7 +35,8 @@ delivers:
 ✔ Star schema modeling in Publish layer\
 ✔ Partition-aware writes\
 ✔ Table-level execution supported\
-✔ Unity Catalog compatible
+✔ Unity Catalog compatible\
+✔ WHL-packaged production deployment
 
 ------------------------------------------------------------------------
 
@@ -67,11 +68,15 @@ No hardcoded: - Table names\
 ------------------------------------------------------------------------
 
 # 🚀 Entry Point (main.py)
-
+``` python
 from retail_medallion_lakehouse.main import run
 
-run("pre_landing") run("landing") run("unification") run("refinement")
+run("pre_landing")
+run("landing")
+run("unification")
+run("refinement")
 run("publish")
+``` 
 
 ------------------------------------------------------------------------
 
@@ -124,40 +129,136 @@ Business Logic: - Net amount calculation\
 - Allocation ratio\
 - YAML-driven column selection
 
-Outputs: - net_amount\
-- gst_amount\
-- final_invoice_amount\
-- allocation_ratio
+Outputs:  - calculated_item_amount\
+- calculated_gst\
+- calculated_discount_allocation\
+- calculated_shipping_allocation\
+- calculated_final_amount
 
 ------------------------------------------------------------------------
 
-# 🟩 Publish Layer
+# 🟩 Publish Layer (Star Schema)
 
-Purpose: Deliver optimized business-ready datasets.
+## Dimensions
 
-Dimensions: - customer_dimension\
-- product_dimension
+-   customer_dimension\
+-   product_dimension
+## Facts
 
-Facts: - cleaned_fact_transactions\
-- payment_fact
+-   cleaned_fact_transactions\
+-   payment_fact
+## Aggregates
 
-Aggregates: - daily_sales_summary\
-- product_performance\
-- customer_lifetime_value\
-- payment_success_rate
+-   daily_sales_summary\
+-   product_performance\
+-   customer_lifetime_value\
+-   payment_success_rate
 
 ------------------------------------------------------------------------
 
-# 🧠 Key Learnings
+# 📦 Packaging & Deployment (WHL Based)
 
--   Medallion architecture in practice\
--   Config-driven pipelines\
--   Schema governance in Delta\
--   Partition overwrite strategies\
--   Star schema modeling\
--   Surrogate key generation\
--   Business-first data modeling\
--   Enterprise-style orchestration
+## Why Packaging?
+
+The project is structured as a Python package to enable:
+
+-   Modular development\
+-   Reusability\
+-   Clean orchestration\
+-   Production deployment\
+-   Version control\
+-   CI/CD readiness
+
+------------------------------------------------------------------------
+
+## 🛠 Build Wheel File
+
+### setup.py
+
+``` python
+from setuptools import setup, find_packages
+
+setup(
+    name="retail_medallion_lakehouse",
+    version="1.0.0",
+    packages=find_packages(),
+    install_requires=[
+        "pyspark",
+        "pyyaml"
+    ],
+)
+```
+
+### Build Command
+
+``` bash
+pip install build
+python -m build
+```
+
+Output:
+
+dist/ retail_medallion_lakehouse-1.0.0-py3-none-any.whl
+
+------------------------------------------------------------------------
+
+## 🚀 Install in Databricks
+
+### Option 1: Upload WHL
+
+-   Compute → Libraries → Install New → Upload WHL\
+-   Restart cluster
+
+### Option 2: Notebook Install
+
+``` python
+%pip install /Workspace/path/retail_medallion_lakehouse-1.0.0-py3-none-any.whl
+```
+
+Restart cluster after installation.
+
+------------------------------------------------------------------------
+
+# 🔄 Deployment Flow
+
+Code Update\
+→ Build WHL\
+→ Upload to Databricks\
+→ Install on Cluster\
+→ Restart Cluster\
+→ Run Pipeline
+
+------------------------------------------------------------------------
+
+# 🧠 Development Mode vs Production Mode
+
+## Development Mode
+
+Use source path insertion to avoid rebuilding wheel during development.
+
+## Production Mode
+
+Install WHL on cluster for stable execution.
+
+------------------------------------------------------------------------
+
+# 📌 Versioning Strategy
+
+1.0.0 → Initial Release\
+1.1.0 → Financial Logic Enhancements\
+1.2.0 → Publish Aggregates Extension\
+2.0.0 → Schema Redesign
+
+------------------------------------------------------------------------
+
+# 🏢 Enterprise Capabilities
+
+-   Unity Catalog Compatible\
+-   Delta Safe Writes\
+-   Partition Overwrite Support\
+-   Config-driven orchestration\
+-   Table-level execution\
+-   Audit & lineage tracking
 
 ------------------------------------------------------------------------
 
