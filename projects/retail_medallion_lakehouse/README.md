@@ -41,17 +41,8 @@ delivers:
 
 # 🧱 Architecture (Medallion Design)
 
-Raw JSON/API\
-↓\
-Pre-Landing (Raw Ingest)\
-↓\
-Landing (Validation & Standardization)\
-↓\
-Unification (Business Join Layer)\
-↓\
-Refinement (Business Calculations)\
-↓\
-Publish (Facts, Dimensions, Aggregates)
+<img width="1536" height="1024" alt="ChatGPT Image Feb 24, 2026, 12_57_50 PM" src="https://github.com/user-attachments/assets/42f64583-ca37-40f6-8225-ca5bcee02677" />
+
 
 ------------------------------------------------------------------------
 
