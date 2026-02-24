@@ -4,7 +4,11 @@ from retail_medallion_lakehouse.unification.run_unification import run_unificati
 from retail_medallion_lakehouse.refinement.run_refinement import run_refinement
 from retail_medallion_lakehouse.publish.run_publish import run_publish
 
-def run(layer: str, dataset: str = None):
+def run(layer: str, 
+        dataset: str = None,
+        folder_type: str = None,
+        start_year: int = None,
+        end_year: int = None):
     """
     Main orchestration function.
     Routes execution based on layer.
@@ -16,7 +20,11 @@ def run(layer: str, dataset: str = None):
 
     try:
         if layer == "pre_landing":
-            return run_pre_landing(layer_name=layer, dataset_name=dataset)
+            return run_pre_landing(layer_name=layer, 
+                                    dataset_name=dataset,
+                                    folder_type=folder_type,
+                                    start_year=start_year,
+                                    end_year=end_year)
 
         elif layer == "landing":
             return run_landing(layer_name=layer, dataset_name=dataset)

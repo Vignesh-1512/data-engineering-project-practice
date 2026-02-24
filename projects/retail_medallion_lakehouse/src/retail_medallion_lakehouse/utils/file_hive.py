@@ -37,7 +37,7 @@ def write_table(
         # ------------------------------------------------
         # 🔥 DEV FIX: Drop table before overwrite
         # ------------------------------------------------
-        if mode == "overwrite":
+        if mode == "overwrite" and not dynamic_partition:
             print("   Dropping existing table (dev-safe overwrite)")
             spark.sql(f"DROP TABLE IF EXISTS {target_table}")
 

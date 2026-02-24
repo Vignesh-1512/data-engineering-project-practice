@@ -17,7 +17,7 @@ pre_landing:
     # ----------------------------
     # 📡 Source Info
     # ----------------------------
-    input_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data/transactional_dataset.json"
+    input_base_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data"
     file_type: json
 
     # ----------------------------
@@ -67,9 +67,9 @@ pre_landing:
     target_schema: pre_landing
     table_name: payments
 
-    input_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data/payment_dataset.json"
+    input_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data"
     file_type: json
-    load_type: full
+    
 
     select_columns:
       - payment_id
@@ -94,9 +94,9 @@ pre_landing:
     target_schema: pre_landing
     table_name: products
 
-    input_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data/product_dataset.json"
+    input_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data"
     file_type: json
-    load_type: full
+    
 
 
     # Direct select

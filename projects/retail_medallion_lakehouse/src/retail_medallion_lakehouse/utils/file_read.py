@@ -19,6 +19,9 @@ def read_data(spark, path: str, file_type: str, schema=None):
 
             if response.status_code != 200:
                 raise Exception(f"API request failed: {response.status_code}")
+                
+            if response.status_code == 404:
+                raise FileNotFoundError(f"File not found: {path}")
 
             data = response.json()
 

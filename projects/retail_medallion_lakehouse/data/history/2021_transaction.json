@@ -1,0 +1,846 @@
+[
+    {
+        "transaction_id": "T7785",
+        "customer": {
+            "cust_id": 2531,
+            "name": "Customer_2531",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2531@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "7046612465"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "7a6685d6-629c-480d-a667-2bab1daf68f7",
+                "Produktname": "Headphones_793",
+                "Menge": 2,
+                "Einheitspreis": 86150.75
+            },
+            {
+                "Produkt_ID": "85e3b580-e4f4-4724-aa3a-e165618fa571",
+                "Produktname": "Smartwatch_411",
+                "Menge": 1,
+                "Einheitspreis": 181864.95
+            },
+            {
+                "Produkt_ID": "e45a1e4b-c7cb-4ce2-b6e9-a94702967f00",
+                "Produktname": "Mouse_925",
+                "Menge": 1,
+                "Einheitspreis": 138587.0
+            }
+        ],
+        "transaction_ts": "2021-01-14T03:59:58Z",
+        "Standort": "Pune"
+    },
+    {
+        "transaction_id": "T6615",
+        "customer": {
+            "cust_id": 2350,
+            "name": "Customer_2350",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2350@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "9436627250"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "62cec461-ac09-45a6-9c01-e3cab72ccc4f",
+                "Produktname": "Monitor_056",
+                "Menge": 2,
+                "Einheitspreis": 77320.34
+            }
+        ],
+        "transaction_ts": "2021-08-01T05:26:42Z",
+        "Standort": "Bangalore"
+    },
+    {
+        "transaction_id": "T5656",
+        "customer": {
+            "cust_id": 2255,
+            "name": "Customer_2255",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2255@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "9479560203"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "53dddb56-923f-4f9e-937a-aa19abb7e597",
+                "Produktname": "Monitor_750",
+                "Menge": 4,
+                "Einheitspreis": 73850.98
+            },
+            {
+                "Produkt_ID": "9b023a95-d500-40f3-ac6a-714c6bffdaf6",
+                "Produktname": "Mouse_500",
+                "Menge": 5,
+                "Einheitspreis": 177544.8
+            },
+            {
+                "Produkt_ID": "6092156c-c8f4-4d7c-bdf4-271fe795f303",
+                "Produktname": "Headphones_533",
+                "Menge": 4,
+                "Einheitspreis": 13195.05
+            }
+        ],
+        "transaction_ts": "2021-01-05T19:06:33Z",
+        "Standort": "Pune"
+    },
+    {
+        "transaction_id": "T7250",
+        "customer": {
+            "cust_id": 2262,
+            "name": "Customer_2262",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2262@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "7601593033"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "4eda6e94-9ca3-439e-8258-237cc687f025",
+                "Produktname": "Laptop_165",
+                "Menge": 3,
+                "Einheitspreis": 136626.83
+            }
+        ],
+        "transaction_ts": "2021-01-22T17:12:49Z",
+        "Standort": "Bangalore"
+    },
+    {
+        "transaction_id": "T5848",
+        "customer": {
+            "cust_id": 2489,
+            "name": "Customer_2489",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2489@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "8342974464"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "c9a58b71-6796-4b88-8642-47345c1a604e",
+                "Produktname": "Router_389",
+                "Menge": 4,
+                "Einheitspreis": 106325.12
+            },
+            {
+                "Produkt_ID": "c6d14b58-9b88-4772-b3d8-5bebe1d9811e",
+                "Produktname": "Monitor_246",
+                "Menge": 4,
+                "Einheitspreis": 38083.66
+            },
+            {
+                "Produkt_ID": "a322853f-b8b0-46dc-ae17-87eca3f62cd0",
+                "Produktname": "Laptop_815",
+                "Menge": 1,
+                "Einheitspreis": 62488.45
+            }
+        ],
+        "transaction_ts": "2021-08-02T20:33:29Z",
+        "Standort": "Hyderabad"
+    },
+    {
+        "transaction_id": "T2728",
+        "customer": {
+            "cust_id": 2284,
+            "name": "Customer_2284",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2284@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "6368980154"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "d800d93a-4b80-4f54-b8d5-0e39b8f79b5e",
+                "Produktname": "Monitor_217",
+                "Menge": 1,
+                "Einheitspreis": 102878.93
+            },
+            {
+                "Produkt_ID": "ea27d28c-3117-479f-80d9-715883278e19",
+                "Produktname": "Smartwatch_959",
+                "Menge": 4,
+                "Einheitspreis": 115123.13
+            }
+        ],
+        "transaction_ts": "2021-11-19T17:10:45Z",
+        "Standort": "Hyderabad"
+    },
+    {
+        "transaction_id": "T7445",
+        "customer": {
+            "cust_id": 2853,
+            "name": "Customer_2853",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2853@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "6841072704"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "2c8958ae-a5c2-497a-aeb4-0fe824ac7e1c",
+                "Produktname": "Monitor_451",
+                "Menge": 3,
+                "Einheitspreis": 17395.5
+            },
+            {
+                "Produkt_ID": "e787430b-adac-4724-be33-edfbd7787053",
+                "Produktname": "Keyboard_451",
+                "Menge": 5,
+                "Einheitspreis": 8977.96
+            }
+        ],
+        "transaction_ts": "2021-02-14T17:19:30Z",
+        "Standort": "Bangalore"
+    },
+    {
+        "transaction_id": "T3140",
+        "customer": {
+            "cust_id": 2947,
+            "name": "Customer_2947",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2947@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "7892678235"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "66898a62-7954-42a8-b52e-f67bba9e535b",
+                "Produktname": "Keyboard_435",
+                "Menge": 2,
+                "Einheitspreis": 121638.52
+            }
+        ],
+        "transaction_ts": "2021-06-10T14:36:12Z",
+        "Standort": "Pune"
+    },
+    {
+        "transaction_id": "T8946",
+        "customer": {
+            "cust_id": 2832,
+            "name": "Customer_2832",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2832@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "6740825497"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "f276a002-e0cf-419a-8062-d999edc976d3",
+                "Produktname": "Keyboard_212",
+                "Menge": 5,
+                "Einheitspreis": 16463.6
+            }
+        ],
+        "transaction_ts": "2021-02-11T19:34:06Z",
+        "Standort": "Hyderabad"
+    },
+    {
+        "transaction_id": "T6312",
+        "customer": {
+            "cust_id": 2996,
+            "name": "Customer_2996",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2996@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "8830930103"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "41f55fe7-32c6-4a03-b458-8a76f652a351",
+                "Produktname": "Camera_332",
+                "Menge": 1,
+                "Einheitspreis": 26210.21
+            },
+            {
+                "Produkt_ID": "b1bcf0e1-f616-47da-a975-8c4081b87d7d",
+                "Produktname": "Camera_249",
+                "Menge": 5,
+                "Einheitspreis": 156520.75
+            },
+            {
+                "Produkt_ID": "00f50e3e-d790-41c3-8b2e-50d3d490f752",
+                "Produktname": "Headphones_393",
+                "Menge": 4,
+                "Einheitspreis": 53420.78
+            }
+        ],
+        "transaction_ts": "2021-07-11T20:13:17Z",
+        "Standort": "Pune"
+    },
+    {
+        "transaction_id": "T5614",
+        "customer": {
+            "cust_id": 2251,
+            "name": "Customer_2251",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2251@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "9450642396"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "8021dadf-afbc-4b5d-92cd-29db25973506",
+                "Produktname": "Router_968",
+                "Menge": 1,
+                "Einheitspreis": 249412.29
+            },
+            {
+                "Produkt_ID": "b7f88d06-32bc-4021-a1ce-0d4df3ea603d",
+                "Produktname": "Speaker_725",
+                "Menge": 3,
+                "Einheitspreis": 190523.24
+            }
+        ],
+        "transaction_ts": "2021-04-30T13:10:58Z",
+        "Standort": "Bangalore"
+    },
+    {
+        "transaction_id": "T4199",
+        "customer": {
+            "cust_id": 2796,
+            "name": "Customer_2796",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2796@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "6029600173"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "271c6c6b-f5d4-412a-bd1b-254d93c5e151",
+                "Produktname": "Speaker_502",
+                "Menge": 4,
+                "Einheitspreis": 190099.96
+            }
+        ],
+        "transaction_ts": "2021-02-09T05:31:10Z",
+        "Standort": "Chennai"
+    },
+    {
+        "transaction_id": "T2782",
+        "customer": {
+            "cust_id": 2025,
+            "name": "Customer_2025",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2025@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "9800805075"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "93e25105-641f-4a6a-9976-58994e6ff648",
+                "Produktname": "Camera_117",
+                "Menge": 3,
+                "Einheitspreis": 246804.65
+            }
+        ],
+        "transaction_ts": "2021-04-07T09:51:49Z",
+        "Standort": "Pune"
+    },
+    {
+        "transaction_id": "T2522",
+        "customer": {
+            "cust_id": 2359,
+            "name": "Customer_2359",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2359@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "9816644150"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "e4000747-cfdc-4c54-9328-08f5b056473a",
+                "Produktname": "Monitor_193",
+                "Menge": 5,
+                "Einheitspreis": 103026.46
+            }
+        ],
+        "transaction_ts": "2021-09-21T15:10:51Z",
+        "Standort": "Mumbai"
+    },
+    {
+        "transaction_id": "T3818",
+        "customer": {
+            "cust_id": 2403,
+            "name": "Customer_2403",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2403@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "8005809641"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "b065481a-e239-412c-9a0d-800aac9e9177",
+                "Produktname": "Laptop_894",
+                "Menge": 1,
+                "Einheitspreis": 58023.17
+            },
+            {
+                "Produkt_ID": "b5639870-26ce-4cd5-a00f-ab5fbd2297bb",
+                "Produktname": "Headphones_188",
+                "Menge": 1,
+                "Einheitspreis": 27862.44
+            },
+            {
+                "Produkt_ID": "e2c62260-e41f-4cb2-b331-64278f4bbc00",
+                "Produktname": "Smartwatch_621",
+                "Menge": 4,
+                "Einheitspreis": 87434.91
+            }
+        ],
+        "transaction_ts": "2021-04-18T18:46:46Z",
+        "Standort": "Hyderabad"
+    },
+    {
+        "transaction_id": "T9229",
+        "customer": {
+            "cust_id": 2490,
+            "name": "Customer_2490",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2490@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "8172935247"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "96f7be80-4021-4830-945e-d0cbad9c2fd2",
+                "Produktname": "Laptop_403",
+                "Menge": 4,
+                "Einheitspreis": 48818.83
+            },
+            {
+                "Produkt_ID": "b2c6cfd7-3cff-462f-b4d3-2d1c3a7d1f0b",
+                "Produktname": "Monitor_341",
+                "Menge": 4,
+                "Einheitspreis": 114599.42
+            },
+            {
+                "Produkt_ID": "145f9c0c-2dd3-40f8-8337-8804b295964c",
+                "Produktname": "Monitor_568",
+                "Menge": 3,
+                "Einheitspreis": 224743.08
+            }
+        ],
+        "transaction_ts": "2021-04-07T21:40:51Z",
+        "Standort": "Chennai"
+    },
+    {
+        "transaction_id": "T9701",
+        "customer": {
+            "cust_id": 2684,
+            "name": "Customer_2684",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2684@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "8270616631"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "690efd54-1c22-44d2-8625-bdfecd2e0e15",
+                "Produktname": "Router_428",
+                "Menge": 1,
+                "Einheitspreis": 140781.05
+            },
+            {
+                "Produkt_ID": "053e341d-61ef-41b7-b55e-3895be629f03",
+                "Produktname": "Monitor_481",
+                "Menge": 1,
+                "Einheitspreis": 89653.81
+            }
+        ],
+        "transaction_ts": "2021-06-13T23:55:45Z",
+        "Standort": "Hyderabad"
+    },
+    {
+        "transaction_id": "T1719",
+        "customer": {
+            "cust_id": 2273,
+            "name": "Customer_2273",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2273@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "7079680532"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "895f0ebb-478c-43df-abc2-29a8cc375425",
+                "Produktname": "Microphone_001",
+                "Menge": 3,
+                "Einheitspreis": 87274.56
+            },
+            {
+                "Produkt_ID": "2fc77d32-02e7-4bb5-907e-6062bea9c822",
+                "Produktname": "Keyboard_243",
+                "Menge": 3,
+                "Einheitspreis": 237301.12
+            },
+            {
+                "Produkt_ID": "4116a5a9-f88b-4b3c-8970-fe98959a25b7",
+                "Produktname": "Headphones_826",
+                "Menge": 4,
+                "Einheitspreis": 143523.86
+            }
+        ],
+        "transaction_ts": "2021-09-19T23:56:32Z",
+        "Standort": "Bangalore"
+    },
+    {
+        "transaction_id": "T1970",
+        "customer": {
+            "cust_id": 2637,
+            "name": "Customer_2637",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2637@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "8373974554"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "edd30ff5-e36f-4a0e-a979-107d82c3ba67",
+                "Produktname": "Monitor_760",
+                "Menge": 4,
+                "Einheitspreis": 26158.44
+            },
+            {
+                "Produkt_ID": "38983864-c0d6-4d2b-b7db-e9281f9c4b91",
+                "Produktname": "Keyboard_051",
+                "Menge": 1,
+                "Einheitspreis": 24349.38
+            },
+            {
+                "Produkt_ID": "6ce959e4-8b49-4f54-9979-92190bf087b2",
+                "Produktname": "Monitor_249",
+                "Menge": 4,
+                "Einheitspreis": 209803.33
+            }
+        ],
+        "transaction_ts": "2021-06-16T01:41:55Z",
+        "Standort": "Hyderabad"
+    },
+    {
+        "transaction_id": "T1481",
+        "customer": {
+            "cust_id": 2556,
+            "name": "Customer_2556",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2556@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "6119662634"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "e35f813f-f40f-4c16-935d-873fd3885ae4",
+                "Produktname": "Headphones_644",
+                "Menge": 1,
+                "Einheitspreis": 95384.02
+            },
+            {
+                "Produkt_ID": "8f192ddf-49d6-407b-b776-f107bc515b08",
+                "Produktname": "Camera_795",
+                "Menge": 3,
+                "Einheitspreis": 98659.71
+            },
+            {
+                "Produkt_ID": "de71df00-baa0-4e96-887b-9285f4a41547",
+                "Produktname": "Monitor_532",
+                "Menge": 5,
+                "Einheitspreis": 16524.65
+            }
+        ],
+        "transaction_ts": "2021-01-29T03:22:48Z",
+        "Standort": "Bangalore"
+    },
+    {
+        "transaction_id": "T1641",
+        "customer": {
+            "cust_id": 2391,
+            "name": "Customer_2391",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2391@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "8330303009"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "127888c2-6e3a-4f37-8180-dddfe05f5539",
+                "Produktname": "Camera_777",
+                "Menge": 2,
+                "Einheitspreis": 1904.14
+            }
+        ],
+        "transaction_ts": "2021-09-23T19:07:18Z",
+        "Standort": "Hyderabad"
+    },
+    {
+        "transaction_id": "T7699",
+        "customer": {
+            "cust_id": 2381,
+            "name": "Customer_2381",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2381@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "7176105721"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "df427983-5815-4539-abb2-86d6f06dd83d",
+                "Produktname": "Router_938",
+                "Menge": 5,
+                "Einheitspreis": 160019.29
+            },
+            {
+                "Produkt_ID": "473ad4e1-7cb4-4893-ab00-b12fed02b3de",
+                "Produktname": "Microphone_053",
+                "Menge": 5,
+                "Einheitspreis": 245319.14
+            }
+        ],
+        "transaction_ts": "2021-02-05T10:27:25Z",
+        "Standort": "Mumbai"
+    },
+    {
+        "transaction_id": "T3151",
+        "customer": {
+            "cust_id": 2891,
+            "name": "Customer_2891",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2891@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "9627336038"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "97fe313c-69db-4d1e-baf4-5c425a8d7e42",
+                "Produktname": "Monitor_543",
+                "Menge": 2,
+                "Einheitspreis": 73622.97
+            },
+            {
+                "Produkt_ID": "5a586a6e-43ba-481f-8803-69ca65090af4",
+                "Produktname": "Keyboard_116",
+                "Menge": 2,
+                "Einheitspreis": 153583.08
+            },
+            {
+                "Produkt_ID": "d22e4376-cdf8-4e38-b001-82ae43f4c8a4",
+                "Produktname": "Camera_060",
+                "Menge": 3,
+                "Einheitspreis": 87649.35
+            }
+        ],
+        "transaction_ts": "2021-03-04T21:33:31Z",
+        "Standort": "Pune"
+    },
+    {
+        "transaction_id": "T8924",
+        "customer": {
+            "cust_id": 2541,
+            "name": "Customer_2541",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2541@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "9046709000"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "0b96a712-0968-4f90-b2d3-39064179b1b9",
+                "Produktname": "Mouse_206",
+                "Menge": 2,
+                "Einheitspreis": 122899.99
+            },
+            {
+                "Produkt_ID": "3e109f3a-3e9a-4b8b-ad46-52f9940592f5",
+                "Produktname": "Monitor_786",
+                "Menge": 3,
+                "Einheitspreis": 164969.96
+            },
+            {
+                "Produkt_ID": "0456c6cf-319f-486d-8451-7c144ce3d266",
+                "Produktname": "Speaker_195",
+                "Menge": 4,
+                "Einheitspreis": 98348.23
+            }
+        ],
+        "transaction_ts": "2021-12-29T09:47:34Z",
+        "Standort": "Pune"
+    },
+    {
+        "transaction_id": "T1908",
+        "customer": {
+            "cust_id": 2176,
+            "name": "Customer_2176",
+            "contacts": [
+                {
+                    "type": "email",
+                    "value": "customer2176@example.com"
+                },
+                {
+                    "type": "phone",
+                    "value": "7110910923"
+                }
+            ]
+        },
+        "items": [
+            {
+                "Produkt_ID": "086d822e-cf1e-4ea4-8cb2-fd483569fc9e",
+                "Produktname": "Microphone_438",
+                "Menge": 4,
+                "Einheitspreis": 91379.63
+            },
+            {
+                "Produkt_ID": "f49d0c60-c47e-4c15-9ec1-b8da59e127fc",
+                "Produktname": "Speaker_643",
+                "Menge": 1,
+                "Einheitspreis": 142804.96
+            }
+        ],
+        "transaction_ts": "2021-02-16T02:26:29Z",
+        "Standort": "Chennai"
+    }
+]
+
