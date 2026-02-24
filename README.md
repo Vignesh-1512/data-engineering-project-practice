@@ -15,10 +15,12 @@ It is structured as a **mono-repo** for learning and practice.
   - Architecture notes
   - Medallion architecture
   - Data modeling
+    
 -Retail_medallion_architecture
   - Data modeling
   - Architecture Notes
   - Medallion architecture
+
 
 
 
