@@ -4,15 +4,19 @@ from retail_medallion_lakehouse.unification.run_unification import run_unificati
 from retail_medallion_lakehouse.refinement.run_refinement import run_refinement
 from retail_medallion_lakehouse.publish.run_publish import run_publish
 
-def run(layer: str, 
-        dataset: str = None,
-        folder_type: str = None,
-        start_year: int = None,
-        end_year: int = None):
-    """
-    Main orchestration function.
-    Routes execution based on layer.
-    """
+def run(
+    layer: str,
+    dataset: str = None,
+    folder_type: str = None,
+    start_year: int = None,
+    end_year: int = None
+):
+
+    # Normalize layer & dataset
+    layer = layer.lower()
+
+    if dataset:
+        dataset = dataset.lower()
 
     print("\n===================================")
     print(f"🚀 PIPELINE STARTED | Layer: {layer}")
@@ -20,22 +24,26 @@ def run(layer: str,
 
     try:
         if layer == "pre_landing":
-            return run_pre_landing(layer_name=layer, 
-                                    dataset_name=dataset,
-                                    folder_type=folder_type,
-                                    start_year=start_year,
-                                    end_year=end_year)
+            return run_pre_landing(
+                layer_name=layer,
+                dataset_name=dataset,
+                folder_type=folder_type.lower() if folder_type else None,
+                start_year=start_year,
+                end_year=end_year
+            )
 
         elif layer == "landing":
             return run_landing(layer_name=layer, dataset_name=dataset)
 
         elif layer == "unification":
             return run_unification(layer_name=layer, dataset_name=dataset)
-        
+
         elif layer == "refinement":
-            return run_refinement(layer_name=layer,dataset_name=dataset)
+            return run_refinement(layer_name=layer, dataset_name=dataset)
+
         elif layer == "publish":
-            return run_publish(layer_name=layer,dataset_name=dataset)
+            return run_publish(layer_name=layer, dataset_name=dataset)
+
         else:
             raise ValueError(f"Unsupported layer: {layer}")
 

@@ -24,22 +24,12 @@ def run_pre_landing(
 ):
 
     spark = get_spark(app_name=f"retail_{layer_name}")
+    layer_config = load_config()[layer_name]
 
-    try:
-        layer_config = load_config()[layer_name]
-    except Exception as error:
-        raise Exception(
-            f"Failed to load config for layer '{layer_name}'. "
-            f"Reason: {str(error)}"
-        )
-
-    print("\n==============================")
+    print("\n===================================")
     print("🚀 PRE-LANDING STARTED")
-    print("==============================")
+    print("===================================")
 
-    # ------------------------------
-    # Validate Inputs
-    # ------------------------------
     if not folder_type:
         raise Exception("folder_type must be provided.")
 
@@ -64,203 +54,233 @@ def run_pre_landing(
     # ------------------------------
     for dataset, dataset_config in datasets_to_process.items():
 
-        try:
-            print(f"\n→ Processing dataset: {dataset}")
+        print(f"\n→ Processing dataset: {dataset}")
 
-            write_mode = layer_config["write_mode"]
-            base_url = dataset_config["input_base_path"]
-            file_type = dataset_config["file_type"]
+        write_mode = layer_config["write_mode"]
 
-            dataframes = []
+               # 🔹 Master dataset → always overwrite
+        is_master = dataset_config.get("is_master_dataset", False)
 
-            # ------------------------------
-            # RANGE LOAD
-            # ------------------------------
-            if start_year is not None and end_year is not None:
+        if is_master:
+            print("  Master dataset detected → using overwrite mode")
+            write_mode = "overwrite"
 
-                print(f"  Loading range {start_year} → {end_year}")
+        base_url = dataset_config["input_base_path"]
+        file_type = dataset_config["file_type"]
 
-                for year in range(start_year, end_year + 1):
+        
 
-                    file_url = f"{base_url}/{folder_type}/{year}_{dataset}.json"
-                    print(f"  Reading: {file_url}")
+        dataframes = []
 
+        # =====================================================
+        # MASTER DATASET LOAD (NO YEAR LOOP)
+        # =====================================================
+        if is_master:
+
+            master_year = 2021  # Your products base year
+            file_url = f"{base_url}/{folder_type}/{master_year}_{dataset}.json"
+
+            print(f"  Reading master file: {file_url}")
+
+            df = read_data(
+                spark=spark,
+                path=file_url,
+                file_type=file_type
+            )
+
+            dataframes.append(df)
+
+        # =====================================================
+        # NORMAL YEAR RANGE LOAD
+        # =====================================================
+        elif start_year is not None and end_year is not None:
+
+            for year in range(start_year, end_year + 1):
+
+                file_url = f"{base_url}/{folder_type}/{year}_{dataset}.json"
+                print(f"  Reading: {file_url}")
+
+                df = read_data(
+                    spark=spark,
+                    path=file_url,
+                    file_type=file_type
+                )
+
+                dataframes.append(df)
+
+        # =====================================================
+        # FULL FOLDER AUTO-DETECT
+        # =====================================================
+        else:
+
+            print("  No year range provided → attempting full folder load.")
+
+            for year in range(2000, 2035):
+
+                file_url = f"{base_url}/{folder_type}/{year}_{dataset}.json"
+
+                try:
                     df = read_data(
                         spark=spark,
                         path=file_url,
-                        file_type=file_type,
-                        schema=None
+                        file_type=file_type
                     )
-
                     dataframes.append(df)
+                    print(f"  Loaded: {file_url}")
+                except:
+                    continue
+
+        if not dataframes:
+            raise Exception(f"No files found for dataset '{dataset}'.")
+
+
+        # ------------------------------
+        # UNION ALL YEARS
+        # ------------------------------
+        dataframe = dataframes[0]
+        for df in dataframes[1:]:
+            dataframe = dataframe.unionByName(df, allowMissingColumns=True)
+
+        print(f"  Total Rows Loaded: {dataframe.count()}")
+
+        # =====================================================
+        # COLUMN TRANSLATION
+        # =====================================================
+        translation_config = dataset_config.get("translation")
+
+        if translation_config:
+
+            translation_table = build_path(
+                translation_config["catalog"],
+                translation_config["schema"],
+                translation_config["table_name"]
+            )
+
+            translation_df = spark.table(translation_table)
+
+            column_mapping = {
+                row[translation_config["source_column"]]:
+                row[translation_config["target_column"]]
+                for row in translation_df.collect()
+            }
 
             # ------------------------------
-            # FULL FOLDER LOAD
+            # Root level rename
             # ------------------------------
-            else:
-
-                print("  No year range provided → attempting full folder load.")
-
-                # Safe year window
-                for year in range(2000, 2035):
-
-                    file_url = f"{base_url}/{folder_type}/{year}_{dataset}.json"
-
-                    try:
-                        df = read_data(
-                            spark=spark,
-                            path=file_url,
-                            file_type=file_type,
-                            schema=None
-                        )
-                        dataframes.append(df)
-                        print(f"  Loaded: {file_url}")
-                    except:
-                        continue
-
-            if not dataframes:
-                raise Exception(f"No data files found for dataset '{dataset}'.")
-
-            # ------------------------------
-            # UNION ALL YEARS
-            # ------------------------------
-            dataframe = dataframes[0]
-
-            for df in dataframes[1:]:
-                dataframe = dataframe.unionByName(df, allowMissingColumns=True)
-
-            print(f"  Total Rows Loaded: {dataframe.count()}")
-
-            # ------------------------------
-            # COLUMN TRANSLATION
-            # ------------------------------
-            translation_config = dataset_config.get("translation")
-
-            if translation_config:
-
-                translation_table_name = build_path(
-                    translation_config["catalog"],
-                    translation_config["schema"],
-                    translation_config["table_name"]
-                )
-
-                translation_dataframe = spark.table(translation_table_name)
-
-                column_mapping = {
-                    row[translation_config["source_column"]]:
-                    row[translation_config["target_column"]]
-                    for row in translation_dataframe.collect()
-                }
-
-                # Root rename
-                for column_name in dataframe.columns:
-                    if column_name in column_mapping:
-                        dataframe = dataframe.withColumnRenamed(
-                            column_name,
-                            column_mapping[column_name]
-                        )
-
-                # Nested rename inside items
-                if "items" in dataframe.columns:
-                    item_fields = dataframe.schema["items"].dataType.elementType.fieldNames()
-
-                    dataframe = dataframe.withColumn(
-                        "items",
-                        transform(
-                            col("items"),
-                            lambda nested_row: struct(
-                                *[
-                                    nested_row[field].alias(
-                                        column_mapping.get(field, field)
-                                    )
-                                    for field in item_fields
-                                ]
-                            )
-                        )
+            for column_name in dataframe.columns:
+                if column_name in column_mapping:
+                    dataframe = dataframe.withColumnRenamed(
+                        column_name,
+                        column_mapping[column_name]
                     )
 
             # ------------------------------
-            # EXPLODE ITEMS
+            # Nested rename inside items
             # ------------------------------
-            if "items" in dataset_config.get("explode_columns", []):
+            if "items" in dataframe.columns:
+
+                item_fields = dataframe.schema["items"].dataType.elementType.fieldNames()
+
                 dataframe = dataframe.withColumn(
-                    "item",
-                    explode(col("items"))
+                    "items",
+                    transform(
+                        col("items"),
+                        lambda nested_row: struct(
+                            *[
+                                nested_row[field].alias(
+                                    column_mapping.get(field, field)
+                                )
+                                for field in item_fields
+                            ]
+                        )
+                    )
                 )
 
-            # ------------------------------
-            # CONTACT EXTRACTION
-            # ------------------------------
-            contacts_config = dataset_config.get("contacts")
+        # =====================================================
+        # EXPLODE ITEMS
+        # =====================================================
+        if "items" in dataset_config.get("explode_columns", []):
+            dataframe = dataframe.withColumn("item", explode(col("items")))
 
-            if contacts_config:
+        # =====================================================
+        # CONTACT EXTRACTION (RESTORED)
+        # =====================================================
+        contacts_config = dataset_config.get("contacts")
 
-                parent_column = contacts_config["parent"]
-                type_field = contacts_config["type_field"]
-                value_field = contacts_config["value_field"]
+        if contacts_config:
 
-                for contact_type, output_column in contacts_config["mappings"].items():
-                    dataframe = dataframe.withColumn(
-                        output_column,
-                        element_at(
-                            expr(
-                                f"filter(`{parent_column}`, x -> x.{type_field} = '{contact_type}')"
-                            ),
-                            1
-                        )[value_field]
-                    )
+            print("  Extracting contact details...")
 
-            # ------------------------------
-            # SELECT FINAL COLUMNS
-            # ------------------------------
-            selected_columns = []
+            parent_column = contacts_config["parent"]
+            type_field = contacts_config["type_field"]
+            value_field = contacts_config["value_field"]
 
-            for column_expression in dataset_config["select_columns"]:
+            for contact_type, output_column in contacts_config["mappings"].items():
+                dataframe = dataframe.withColumn(
+                    output_column,
+                    element_at(
+                        expr(
+                            f"filter(`{parent_column}`, x -> x.{type_field} = '{contact_type}')"
+                        ),
+                        1
+                    )[value_field]
+                )
 
-                if " as " in column_expression:
-                    original_column, alias_name = column_expression.split(" as ")
-                else:
-                    original_column = column_expression
-                    alias_name = None
+        # =====================================================
+        # SELECT FINAL COLUMNS (SAFE VERSION)
+        # =====================================================
+        selected_columns = []
+        existing_columns = dataframe.columns
 
+        for column_expression in dataset_config["select_columns"]:
+
+            if " as " in column_expression:
+                original_column, alias_name = column_expression.split(" as ")
+            else:
+                original_column = column_expression
+                alias_name = None
+
+            original_column = original_column.strip()
+
+            if original_column in existing_columns:
+                column_obj = col(f"`{original_column}`")
+
+            elif original_column.split(".")[0] in existing_columns:
                 column_obj = col(original_column)
 
-                if alias_name:
-                    column_obj = column_obj.alias(alias_name)
+            else:
+                raise Exception(f"Column not found: {original_column}")
 
-                selected_columns.append(column_obj)
+            if alias_name:
+                column_obj = column_obj.alias(alias_name.strip())
 
-            dataframe = dataframe.select(*selected_columns)
+            selected_columns.append(column_obj)
 
-            # ------------------------------
-            # ADD INGEST TIMESTAMP
-            # ------------------------------
-            dataframe = dataframe.withColumn(
-                "ingest_ts",
-                current_timestamp()
-            )
+        dataframe = dataframe.select(*selected_columns)
 
-            # ------------------------------
-            # WRITE TO UNITY CATALOG
-            # ------------------------------
-            target_table_name = build_path(
-                dataset_config["catalog"],
-                dataset_config["target_schema"],
-                dataset_config["table_name"]
-            )
+        # ------------------------------
+        # ADD INGEST TIMESTAMP
+        # ------------------------------
+        dataframe = dataframe.withColumn(
+            "ingest_ts",
+            current_timestamp()
+        )
 
-            write_table(
-                df=dataframe,
-                target_table=target_table_name,
-                mode=write_mode
-            )
+        # ------------------------------
+        # WRITE TABLE
+        # ------------------------------
+        target_table = build_path(
+            dataset_config["catalog"],
+            dataset_config["target_schema"],
+            dataset_config["table_name"]
+        )
 
-            print(f"  ✅ Completed dataset: {dataset}")
+        write_table(
+            df=dataframe,
+            target_table=target_table,
+            mode=write_mode
+        )
 
-        except Exception as error:
-            raise Exception(
-                f"[Pre-Landing] Failed for dataset '{dataset}'. "
-                f"Reason: {str(error)}"
-            )
+        print(f"  ✅ Completed dataset: {dataset}")
 
     print("\n🏁 PRE-LANDING COMPLETED")

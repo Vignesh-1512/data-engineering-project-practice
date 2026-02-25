@@ -1,4 +1,7 @@
 import requests
+import json
+import tempfile
+import os
 import pandas as pd
 
 
@@ -11,23 +14,27 @@ def read_data(spark, path: str, file_type: str, schema=None):
         file_type = file_type.lower()
 
         # ---------------------------------------------------
-        # JSON FROM API
+        # JSON FROM API (Spark Connect SAFE)
         # ---------------------------------------------------
         if file_type == "json" and path.startswith("http"):
 
             response = requests.get(path, timeout=30)
 
-            if response.status_code != 200:
-                raise Exception(f"API request failed: {response.status_code}")
-                
+            # Handle 404 explicitly (file not found)
             if response.status_code == 404:
                 raise FileNotFoundError(f"File not found: {path}")
 
+            # Handle other HTTP errors
+            if response.status_code != 200:
+                raise Exception(f"API request failed: {response.status_code}")
+
             data = response.json()
 
+            # Ensure list of records
             if isinstance(data, dict):
                 data = [data]
 
+            # Flatten JSON using pandas
             pdf = pd.json_normalize(data)
 
             if schema:
@@ -36,7 +43,7 @@ def read_data(spark, path: str, file_type: str, schema=None):
             return spark.createDataFrame(pdf)
 
         # ---------------------------------------------------
-        # JSON FROM FILE
+        # JSON FROM FILE (DBFS / Workspace / Local)
         # ---------------------------------------------------
         elif file_type == "json":
 
@@ -51,17 +58,23 @@ def read_data(spark, path: str, file_type: str, schema=None):
         # CSV
         # ---------------------------------------------------
         elif file_type == "csv":
-            return (
+
+            reader = (
                 spark.read
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .csv(path)
             )
+
+            if schema:
+                reader = reader.schema(schema)
+
+            return reader.csv(path)
 
         # ---------------------------------------------------
         # PARQUET
         # ---------------------------------------------------
         elif file_type == "parquet":
+
             return spark.read.parquet(path)
 
         else:

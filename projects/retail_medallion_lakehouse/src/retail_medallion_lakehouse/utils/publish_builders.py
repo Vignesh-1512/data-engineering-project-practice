@@ -14,6 +14,7 @@ from pyspark.sql.functions import (
     to_json,
     array,
     struct,
+    expr,
     lit
 )
 
@@ -87,30 +88,30 @@ def build_aggregate(df, config):
     grouped = df.groupBy(*group_cols)
     agg_exprs = []
 
-    for alias, expr in config["metrics"].items():
+    for alias, metric_expr in config["metrics"].items():
 
-        if expr.startswith("sum("):
-            column = expr[4:-1]
+        if metric_expr.startswith("sum("):
+            column = metric_expr[4:-1]
             agg_exprs.append(spark_sum(column).alias(alias))
 
-        elif expr.startswith("count_distinct("):
-            column = expr[15:-1]
+        elif metric_expr.startswith("count_distinct("):
+            column = metric_expr[15:-1]
             agg_exprs.append(countDistinct(column).alias(alias))
 
-        elif expr.startswith("avg("):
-            column = expr[4:-1]
+        elif metric_expr.startswith("avg("):
+            column = metric_expr[4:-1]
             agg_exprs.append(avg(column).alias(alias))
 
-        elif expr.startswith("min("):
-            column = expr[4:-1]
+        elif metric_expr.startswith("min("):
+            column = metric_expr[4:-1]
             agg_exprs.append(spark_min(column).alias(alias))
 
-        elif expr.startswith("max("):
-            column = expr[4:-1]
+        elif metric_expr.startswith("max("):
+            column = metric_expr[4:-1]
             agg_exprs.append(spark_max(column).alias(alias))
 
-        elif expr.startswith("count_if("):
-            condition = expr[9:-1]
+        elif metric_expr.startswith("count_if("):
+            condition = metric_expr[9:-1]
             left, op, right = condition.split()
 
             right= right.strip("'")
@@ -131,10 +132,10 @@ def build_aggregate(df, config):
 
         result = result.withColumn(
             "success_rate_pct",
-            round(col("captured") / col("attempts") * 100, 2)
+            round(expr("try_divide(captured,attempts)*100"), 2)
         ).withColumn(
             "failure_rate_pct",
-            round(col("failed") / col("attempts") * 100, 2)
+            round(expr("try_divide(failed,attempts)*100"), 2)
         )
 
     return result
