@@ -1,7 +1,7 @@
 import re
 
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, trim, lit
+from pyspark.sql.functions import col, trim, lit, max as spark_max
 from pyspark.sql.window import Window
 from pyspark.sql.functions import row_number
 from collections import Counter
@@ -161,3 +161,24 @@ def safe_join(left_df, right_df, join_cols, join_type="left"):
         right_df = right_df.drop(*duplicate_cols)
 
     return left_df.join(right_df, join_cols, join_type)
+
+
+# ==========================================================
+# 🕒 FILTER LATEST BATCH BASED ON INGEST_TS
+# ==========================================================
+def filter_latest_batch(df, ingestion_column="ingest_ts"):
+    """
+    Keeps only records from latest ingestion batch.
+    """
+
+    if ingestion_column not in df.columns:
+        raise Exception(
+            f"[BATCH FILTER] Column '{ingestion_column}' not found."
+        )
+
+    max_ts = (
+        df.select(spark_max(ingestion_column).alias("max_ts"))
+          .collect()[0]["max_ts"]
+    )
+
+    return df.filter(col(ingestion_column) == max_ts)

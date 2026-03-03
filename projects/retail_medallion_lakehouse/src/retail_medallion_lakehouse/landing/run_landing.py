@@ -16,7 +16,8 @@ from retail_medallion_lakehouse.utils.common_transform import (
     apply_not_null_validation,
     apply_positive_validation,
     deduplicate_latest,
-    add_lineage_column
+    add_lineage_column,
+    filter_latest_batch
 )
 
 
@@ -72,6 +73,9 @@ def run_landing(layer_name: str, dataset_name: str | None = None):
             # READ SOURCE USING COMMON FUNCTION
             # -------------------------------------------------
             df = read_table(spark, source_table)
+
+            if config.get("latest_batch_only", False):
+                df = filter_latest_batch(df)
 
             # -------------------------------------------------
             # CAST DATA TYPES

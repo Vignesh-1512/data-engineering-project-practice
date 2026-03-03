@@ -92,7 +92,7 @@ pre_landing:
 
   products:
     is_master_dataset: true
-    
+
     catalog: retail_medallion_lakehouse
     target_schema: pre_landing
     table_name: products
@@ -117,6 +117,7 @@ pre_landing:
 # ==========================================================
 landing:
     write_mode: overwrite
+    
 
     transactions:
         #------------------------------------
@@ -167,6 +168,8 @@ landing:
         primary_keys:
             - transaction_id
             - product_id
+
+        latest_batch_only: true
 
     payments:
         # -------------------------
@@ -223,6 +226,8 @@ landing:
         partition_column: payment_ts
         partition_type: year
 
+        latest_batch_only: true
+
     products:
 
         # ------------------------------------
@@ -269,6 +274,8 @@ landing:
         partition_column: null
         partition_type: null
 
+        latest_batch_only: true
+
 
 #-------------------------------------------
 #
@@ -306,6 +313,8 @@ unification:
 
     overwrite_audit: true
     lineage_value: unification
+
+    
 
 
 #-------------------------------------------
