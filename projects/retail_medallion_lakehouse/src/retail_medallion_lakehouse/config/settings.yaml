@@ -10,9 +10,10 @@ pre_landing:
     # ----------------------------
     # 🎯 Target Table (UC Managed)
     # ----------------------------
-    catalog: retail_medallion_lakehouse
-    target_schema: pre_landing
-    table_name: transactions
+    target:
+      path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/transactions
+      format: parquet
+      mode: append
 
     # ----------------------------
     # 📡 Source Info
@@ -24,9 +25,9 @@ pre_landing:
     # 🌍 Translation Config
     # ----------------------------
     translation:
-      catalog: retail_medallion_lakehouse
-      schema: translation_dataset
-      table_name: language_converter
+      path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/reference/column_translation.csv
+      format: csv
+      header: true
       source_column: Column_Name
       target_column: Convert_Into
       apply_on:
@@ -65,12 +66,14 @@ pre_landing:
 
 
   payments:
-    catalog: retail_medallion_lakehouse
-    target_schema: pre_landing
-    table_name: payments
 
     input_base_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data"
     file_type: json
+
+    target:
+      path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/payments
+      format: parquet
+      mode: append
     
 
     select_columns:
@@ -93,9 +96,10 @@ pre_landing:
   products:
     is_master_dataset: true
 
-    catalog: retail_medallion_lakehouse
-    target_schema: pre_landing
-    table_name: products
+    target:
+      path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/products
+      format: parquet
+      mode: append
 
     input_base_path: "https://raw.githubusercontent.com/Vignesh-1512/data-engineering-project-practice/feature/brazillian_e-commerce/projects/retail_medallion_lakehouse/data"
     file_type: json
@@ -123,14 +127,12 @@ landing:
         #------------------------------------
         # SOURCE
         #------------------------------------
-        catalog: retail_medallion_lakehouse
-        source_schema: pre_landing
-        source_table: transactions
+        source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/transactions
+        file_type: parquet
         #------------------------------------
         # TARGET
         #------------------------------------
-        target_schema: landing
-        target_table: landing_transactions
+        target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/transactions
 
         #------------------------------------
         # CAST RULE
@@ -175,15 +177,13 @@ landing:
         # -------------------------
         # SOURCE
         # -------------------------
-        catalog: retail_medallion_lakehouse
-        source_schema: pre_landing
-        source_table: payments
+        source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/payments
+        file_type: parquet
 
         # -------------------------
         # TARGET
         # -------------------------
-        target_schema: landing
-        target_table: landing_payments
+        target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/payments
 
         # -------------------------
         # CAST RULES
@@ -233,15 +233,14 @@ landing:
         # ------------------------------------
         # SOURCE
         # ------------------------------------
-        catalog: retail_medallion_lakehouse
-        source_schema: pre_landing
-        source_table: products
+        source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/products
+        file_type: parquet
+
 
         # ------------------------------------
         # TARGET
         # ------------------------------------
-        target_schema: landing
-        target_table: landing_products
+        target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/products
 
         # ------------------------------------
         # CAST RULES

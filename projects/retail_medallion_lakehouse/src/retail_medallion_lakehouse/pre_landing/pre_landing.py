@@ -150,13 +150,9 @@ def run_pre_landing(
 
         if translation_config:
 
-            translation_table = build_path(
-                translation_config["catalog"],
-                translation_config["schema"],
-                translation_config["table_name"]
+            translation_df = spark.read.option("header", True).csv(
+                translation_config["path"]
             )
-
-            translation_df = spark.table(translation_table)
 
             column_mapping = {
                 row[translation_config["source_column"]]:
@@ -269,16 +265,15 @@ def run_pre_landing(
         # ------------------------------
         # WRITE TABLE
         # ------------------------------
-        target_table = build_path(
-            dataset_config["catalog"],
-            dataset_config["target_schema"],
-            dataset_config["table_name"]
-        )
+        target_table = dataset_config["target"]["path"]
+        file_format = dataset_config["target"]["format"]
 
         write_table(
             df=dataframe,
             target_table=target_table,
-            mode=write_mode
+            mode=write_mode,
+            format= file_format
+
         )
 
         print(f"  ✅ Completed dataset: {dataset}")

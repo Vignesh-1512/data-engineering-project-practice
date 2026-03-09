@@ -37,11 +37,9 @@ def write_table(
         # ------------------------------------------------
         # 🔥 DEV FIX: Drop table before overwrite
         # ------------------------------------------------
-        if mode == "overwrite" and not dynamic_partition:
-            print("   Dropping existing table (dev-safe overwrite)")
-            spark.sql(f"DROP TABLE IF EXISTS {target_table}")
 
-        writer = df.write.format(format).mode(mode)
+
+        writer = df.write.format(format).mode(mode).option("overwriteSchema", "true")
         
         # ---------------------------------------
         # Dynamic Partition Overwrite
@@ -59,7 +57,10 @@ def write_table(
         if partition_by:
             writer = writer.partitionBy(*partition_by)
 
-        writer.saveAsTable(target_table)
+        if target_table.startswith("abfss://"):
+            writer.save(target_table)
+        else:
+            writer.saveAsTable(target_table)
 
         print("✅ Write completed successfully.")
 

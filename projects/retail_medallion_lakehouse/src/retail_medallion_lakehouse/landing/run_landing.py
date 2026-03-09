@@ -57,22 +57,27 @@ def run_landing(layer_name: str, dataset_name: str | None = None):
             # -------------------------------------------------
             # BUILD TABLE NAMES
             # -------------------------------------------------
-            source_table = build_path(
-                config["catalog"],
-                config["source_schema"],
-                config["source_table"]
-            )
+            # source_table = build_path(
+            #     config["catalog"],
+            #     config["source_schema"],
+            #     config["source_table"]
+            # )
+            source_path = config["source_path"]
+            file_type = config["file_type"]
 
-            target_table = build_path(
-                config["catalog"],
-                config["target_schema"],
-                config["target_table"]
-            )
+            print(f"\n📖 Reading Path: {source_path}")
+
+            if file_type == "parquet":
+                df = spark.read.parquet(source_path)
+            else:
+                df = spark.read.format(file_type).load(source_path)
+
+            target_table = config["target_path"]
 
             # -------------------------------------------------
             # READ SOURCE USING COMMON FUNCTION
             # -------------------------------------------------
-            df = read_table(spark, source_table)
+            # df = read_table(spark, source_table)
 
             if config.get("latest_batch_only", False):
                 df = filter_latest_batch(df)
@@ -174,7 +179,7 @@ def run_landing(layer_name: str, dataset_name: str | None = None):
                 df=df,
                 target_table=target_table,
                 mode=write_mode,
-                format="delta",
+                format="parquet",
                 partition_by=partition_by if partition_by else None,
                 dynamic_partition=dynamic_flag
             )
