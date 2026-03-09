@@ -51,30 +51,9 @@ def run_unification(layer_name: str, dataset_name: str | None = None):
             # ---------------------------------------------
             # BUILD TABLE PATHS
             # ---------------------------------------------
-            transactions_table = build_path(
-                config["catalog"],
-                config["source_schema"],
-                config["transactions_table"]
-            )
-
-            payments_table = build_path(
-                config["catalog"],
-                config["source_schema"],
-                config["payments_table"]
-            )
-
-            products_table = build_path(
-                config["catalog"],
-                config["source_schema"],
-                config["products_table"]
-            )
-
-            # ---------------------------------------------
-            # READ TABLES
-            # ---------------------------------------------
-            transactions_df = read_table(spark, transactions_table)
-            payments_df = read_table(spark, payments_table)
-            products_df = read_table(spark, products_table)
+            transactions_df = spark.read.parquet(config["transactions_path"])
+            payments_df = spark.read.parquet(config["payments_path"])
+            products_df = spark.read.parquet(config["products_path"])
 
             # ---------------------------------------------
             # CLEAN TECHNICAL COLUMNS
@@ -214,17 +193,13 @@ def run_unification(layer_name: str, dataset_name: str | None = None):
             if partition_by and write_mode == "overwrite":
                 dynamic_flag = True
 
-            target_table = build_path(
-                config["catalog"],
-                config["target_schema"],
-                config["target_table"]
-            )
+            target_table = config["target_path"]
 
             write_table(
                 df=unified_df,
                 target_table=target_table,
                 mode=write_mode,
-                format="delta",
+                format="parquet",
                 partition_by=partition_by if partition_by else None,
                 dynamic_partition=dynamic_flag
             )

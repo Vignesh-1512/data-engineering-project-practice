@@ -23,13 +23,8 @@ def run_publish(layer_name: str, dataset_name: str | None = None):
         config = load_config()[layer_name]
         write_mode = config["write_mode"]
 
-        source_table = build_path(
-            config["catalog"],
-            config["source_schema"],
-            config["source_table"]
-        )
-
-        df = read_table(spark, source_table)
+        source_path = config["source_path"]
+        df = spark.read.parquet(source_path)
 
         # Helper flags
         run_all = dataset_name is None
@@ -53,17 +48,13 @@ def run_publish(layer_name: str, dataset_name: str | None = None):
 
             dim_df = build_dimension(df, dim_config)
 
-            target_table = build_path(
-                config["catalog"],
-                config["target_schema"],
-                dim_config["target_table"]
-            )
+            target_table = f"{config['target_base_path']}/{dim_config['target_table']}"
 
             write_table(
                 df=dim_df,
                 target_table=target_table,
                 mode=write_mode,
-                format="delta"
+                format="parquet"
             )
 
         # =====================================================
@@ -82,17 +73,13 @@ def run_publish(layer_name: str, dataset_name: str | None = None):
 
             fact_df, partition_by = build_fact(df, fact_config)
 
-            target_table = build_path(
-                config["catalog"],
-                config["target_schema"],
-                fact_config["target_table"]
-            )
+            target_table = f"{config['target_base_path']}/{fact_config['target_table']}"
 
             write_table(
                 df=fact_df,
                 target_table=target_table,
                 mode=write_mode,
-                format="delta",
+                format="parquet",
                 partition_by=partition_by if partition_by else None,
                 dynamic_partition=bool(partition_by)
             )
@@ -113,17 +100,13 @@ def run_publish(layer_name: str, dataset_name: str | None = None):
 
             agg_df = build_aggregate(df, agg_config)
 
-            target_table = build_path(
-                config["catalog"],
-                config["target_schema"],
-                agg_config["target_table"]
-            )
+            target_table = f"{config['target_base_path']}/{agg_config['target_table']}"
 
             write_table(
                 df=agg_df,
                 target_table=target_table,
                 mode=write_mode,
-                format="delta"
+                format="parquet"
             )
 
         print("\n[ PUBLISH COMPLETED SUCCESSFULLY ]")

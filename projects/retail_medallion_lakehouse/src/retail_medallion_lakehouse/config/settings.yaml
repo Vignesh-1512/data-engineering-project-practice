@@ -290,9 +290,9 @@ unification:
     catalog: retail_medallion_lakehouse
     source_schema: landing
 
-    transactions_table: landing_transactions
-    payments_table: landing_payments
-    products_table: landing_products
+    transactions_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/transactions
+    payments_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/payments
+    products_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/products
 
     joins:
       - right: payments
@@ -304,8 +304,7 @@ unification:
         type: left
         
 
-    target_schema: unification
-    target_table: unification_retail
+    target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/unification/unification_retail
 
     partition_column: transaction_ts
     partition_type: year
@@ -326,9 +325,7 @@ refinement:
 
   refined_dataset:
 
-    catalog: retail_medallion_lakehouse
-    source_schema: unification
-    source_table: unification_retail
+    source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/unification/unification_retail
 
     # 👇 Business-ready curated columns
     select_columns:
@@ -364,8 +361,7 @@ refinement:
       allocation:
         enabled: false
 
-    target_schema: refinement
-    target_table: refined_retail
+    target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/refinement/refined_retail
 
     partition_column: transaction_ts
     partition_type: year
@@ -382,11 +378,9 @@ refinement:
 publish:
   write_mode: overwrite
 
-  catalog: retail_medallion_lakehouse
-  source_schema: refinement
-  source_table: refined_retail
+  source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/refinement/refined_retail
 
-  target_schema: publish
+  target_base_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/publish
 
   dimensions:
 

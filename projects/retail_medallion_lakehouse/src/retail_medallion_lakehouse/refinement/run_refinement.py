@@ -54,13 +54,9 @@ def run_refinement(layer_name: str, dataset_name: str | None = None):
             # ---------------------------------------------
             # READ UNIFIED TABLE
             # ---------------------------------------------
-            source_table = build_path(
-                config["catalog"],
-                config["source_schema"],
-                config["source_table"]
-            )
+            source_path = config["source_path"]
 
-            df = read_table(spark, source_table)
+            df = spark.read.parquet(source_path)
 
             # ---------------------------------------------
             # CLEAN TECHNICAL COLUMNS SAFELY
@@ -173,17 +169,13 @@ def run_refinement(layer_name: str, dataset_name: str | None = None):
             # ---------------------------------------------
             # WRITE REFINED TABLE
             # ---------------------------------------------
-            target_table = build_path(
-                config["catalog"],
-                config["target_schema"],
-                config["target_table"]
-            )
+            target_table = config["target_path"]
 
             write_table(
                 df=df,
                 target_table=target_table,
                 mode=write_mode,
-                format="delta",
+                format="parquet",
                 partition_by=partition_by if partition_by else None,
                 dynamic_partition=True
             )
