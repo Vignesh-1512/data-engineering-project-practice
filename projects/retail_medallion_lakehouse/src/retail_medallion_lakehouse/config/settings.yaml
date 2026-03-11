@@ -11,7 +11,7 @@ pre_landing:
     # 🎯 Target Table (UC Managed)
     # ----------------------------
     target:
-      path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/transactions
+      path: abfss://retail@retailmedallion2.dfs.core.windows.net/prelanding/transactions
       format: parquet
       mode: append
 
@@ -25,7 +25,7 @@ pre_landing:
     # 🌍 Translation Config
     # ----------------------------
     translation:
-      path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/reference/column_translation.csv
+      path: abfss://retail@retailmedallion2.dfs.core.windows.net/reference/column_translation.csv
       format: csv
       header: true
       source_column: Column_Name
@@ -71,7 +71,7 @@ pre_landing:
     file_type: json
 
     target:
-      path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/payments
+      path: abfss://retail@retailmedallion2.dfs.core.windows.net/prelanding/payments
       format: parquet
       mode: append
     
@@ -97,7 +97,7 @@ pre_landing:
     is_master_dataset: true
 
     target:
-      path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/products
+      path: abfss://retail@retailmedallion2.dfs.core.windows.net/prelanding/products
       format: parquet
       mode: append
 
@@ -127,12 +127,12 @@ landing:
         #------------------------------------
         # SOURCE
         #------------------------------------
-        source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/transactions
+        source_path: abfss://retail@retailmedallion2.dfs.core.windows.net/prelanding/transactions
         file_type: parquet
         #------------------------------------
         # TARGET
         #------------------------------------
-        target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/transactions
+        target_path: abfss://retail@retailmedallion2.dfs.core.windows.net/landing/transactions
 
         #------------------------------------
         # CAST RULE
@@ -177,13 +177,13 @@ landing:
         # -------------------------
         # SOURCE
         # -------------------------
-        source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/payments
+        source_path: abfss://retail@retailmedallion2.dfs.core.windows.net/prelanding/payments
         file_type: parquet
 
         # -------------------------
         # TARGET
         # -------------------------
-        target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/payments
+        target_path: abfss://retail@retailmedallion2.dfs.core.windows.net/landing/payments
 
         # -------------------------
         # CAST RULES
@@ -233,14 +233,14 @@ landing:
         # ------------------------------------
         # SOURCE
         # ------------------------------------
-        source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/prelanding/products
+        source_path: abfss://retail@retailmedallion2.dfs.core.windows.net/prelanding/products
         file_type: parquet
 
 
         # ------------------------------------
         # TARGET
         # ------------------------------------
-        target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/products
+        target_path: abfss://retail@retailmedallion2.dfs.core.windows.net/landing/products
 
         # ------------------------------------
         # CAST RULES
@@ -290,9 +290,9 @@ unification:
     catalog: retail_medallion_lakehouse
     source_schema: landing
 
-    transactions_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/transactions
-    payments_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/payments
-    products_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/landing/products
+    transactions_path: abfss://retail@retailmedallion2.dfs.core.windows.net/landing/transactions
+    payments_path: abfss://retail@retailmedallion2.dfs.core.windows.net/landing/payments
+    products_path: abfss://retail@retailmedallion2.dfs.core.windows.net/landing/products
 
     joins:
       - right: payments
@@ -304,7 +304,7 @@ unification:
         type: left
         
 
-    target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/unification/unification_retail
+    target_path: abfss://retail@retailmedallion2.dfs.core.windows.net/unification/unification_retail
 
     partition_column: transaction_ts
     partition_type: year
@@ -325,7 +325,7 @@ refinement:
 
   refined_dataset:
 
-    source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/unification/unification_retail
+    source_path: abfss://retail@retailmedallion2.dfs.core.windows.net/unification/unification_retail
 
     # 👇 Business-ready curated columns
     select_columns:
@@ -361,7 +361,7 @@ refinement:
       allocation:
         enabled: false
 
-    target_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/refinement/refined_retail
+    target_path: abfss://retail@retailmedallion2.dfs.core.windows.net/refinement/refined_retail
 
     partition_column: transaction_ts
     partition_type: year
@@ -378,9 +378,9 @@ refinement:
 publish:
   write_mode: overwrite
 
-  source_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/refinement/refined_retail
+  source_path: abfss://retail@retailmedallion2.dfs.core.windows.net/refinement/refined_retail
 
-  target_base_path: abfss://retail@retailmedallionlakehouse.dfs.core.windows.net/publish
+  target_base_path: abfss://retail@retailmedallion2.dfs.core.windows.net/publish
 
   dimensions:
 
